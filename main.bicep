@@ -25,16 +25,16 @@ resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 	location: location
 	properties: {
 		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'pe-to-firewall'
-				properties: {
-					addressPrefix: privateEndpoint.properties.subnet.id
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: azureFirewall.properties.ipConfigurations[0].properties.privateIPAddress
+			routes: [
+				{
+					name: 'pe-to-firewall'
+					properties: {
+						addressPrefix: vm2SubnetPrefix
+						nextHopType: 'VirtualAppliance'
+						nextHopIpAddress: azureFirewall.properties.ipConfigurations[0].properties.privateIPAddress
+					}
 				}
-			}
-		]
+			]
 	}
 }
 

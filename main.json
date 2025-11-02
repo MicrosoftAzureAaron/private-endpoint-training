@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "2546786294119994462"
+      "templateHash": "18132967294709649847"
     }
   },
   "parameters": {
@@ -114,7 +114,7 @@
           {
             "name": "pe-to-firewall",
             "properties": {
-              "addressPrefix": "[reference(resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpointName')), '2023-09-01').subnet.id]",
+              "addressPrefix": "[parameters('vm2SubnetPrefix')]",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[reference(resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName')), '2023-09-01').ipConfigurations[0].properties.privateIPAddress]"
             }
@@ -122,8 +122,7 @@
         ]
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName'))]",
-        "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpointName'))]"
+        "[resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName'))]"
       ]
     },
     {
