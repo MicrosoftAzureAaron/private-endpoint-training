@@ -2,3 +2,4 @@
 update-revision.ps1
 HubAZFW.bicep
 AzureFirewallAllowPolicy.bicep
+main.bicep

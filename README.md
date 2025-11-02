@@ -54,18 +54,12 @@ This template deploys a secure Azure environment for private endpoint training, 
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutes.png)
 
 ## Deploy to Azure
-To deploy this template in your Azure subscription:
 
-1. Export the Bicep file to an ARM template (JSON):
-   ```pwsh
-   bicep build main.bicep
-   ```
-   This will generate `main.json`.
+To deploy this template in your Azure subscription, use the button below:
 
-2. Click the button below to deploy the ARM template to your Azure subscription:
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.2.17)
 
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.2.16)
+> **Tip:** You can right-click the Deploy to Azure button and select "Open link in new tab," or hold **Ctrl** (Windows) / **Cmd** (Mac) and click the button to open the deployment portal in a new tab.
 
 > **Note:** The button above will deploy the latest `main.json` from this GitHub repository's main branch.
 
@@ -75,6 +69,7 @@ To deploy this template in your Azure subscription:
 This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control. VM2's subnet enforces private endpoint policies, while VM1's subnet routes all outbound traffic through the firewall.
 
 For questions or improvements, please open an issue or contact the author.
+
 
 
 
