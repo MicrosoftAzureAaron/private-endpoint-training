@@ -23,12 +23,15 @@ This template deploys a secure Azure environment for private endpoint training, 
 - VM1Subnet: `10.0.2.0/24`
 - VM2Subnet: `10.0.3.0/24`
 
+
 ## Route Table Details
 - **VM1Subnet Route Table**
   - Route: `0.0.0.0/0` → Next hop: Azure Firewall
+  - **Note:** VM1's route table does not impact traffic destined for the private endpoint. Azure automatically handles private endpoint traffic, bypassing user-defined routes in the subnet. This means VM1 cannot route private endpoint traffic through the firewall unless private endpoint policies are enabled on the subnet.
 - **VM2Subnet Route Table**
   - Route: Private endpoint traffic → Next hop: Azure Firewall
   - Private endpoint policies: Enabled
+  - **Note:** With private endpoint policies enabled, VM2's subnet can enforce custom routing for private endpoint traffic, allowing inspection and control through the Azure Firewall. This is a key difference from VM1's subnet, which does not have private endpoint policies enabled and cannot control private endpoint traffic via its route table.
 
 ## Deploy to Azure
 To deploy this template in your Azure subscription:
@@ -41,9 +44,10 @@ To deploy this template in your Azure subscription:
 
 2. Click the button below to deploy the ARM template to your Azure subscription:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/{REPLACE_WITH_YOUR_JSON_FILE_URL})
 
-> **Note:** Upload your `main.json` to a public location (e.g., GitHub, Azure Blob Storage) and replace `{REPLACE_WITH_YOUR_JSON_FILE_URL}` with the direct link to your file.
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json)
+
+> **Note:** The button above will deploy the latest `main.json` from this GitHub repository's main branch.
 
 ---
 
