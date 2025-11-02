@@ -5,7 +5,7 @@
 
 This template deploys a secure Azure environment for private endpoint training, including:
 
--- **Virtual Network (VNET)**: Address space `10.0.0.0/16` with four subnets:
+- **Virtual Network (VNET)**: Address space `10.0.0.0/16` with four subnets:
   - `AzureFirewallSubnet`: `10.0.0.0/24` (for Azure Firewall)
   - `VM1Subnet`: `10.0.1.0/24` (for VM1)
   - `VM2Subnet`: `10.0.2.0/24` (for VM2, with private endpoint policies enabled)
