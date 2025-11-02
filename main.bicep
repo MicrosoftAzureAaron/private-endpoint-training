@@ -213,12 +213,12 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 // Private DNS Zone for Storage Account private endpoint
 param dnsZoneName string = 'privatelink.file.${environment().suffixes.storage}'
 // For multi-cloud, use: '${environment().suffixes.storageEndpointSuffix}' if needed
-resource privateDnsZone 'Microsoft.Network/privateDnsZones@2023-05-01' = {
+resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
 	name: dnsZoneName
 	location: 'global'
 }
 
-resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2023-05-01' = {
+resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
 	parent: privateDnsZone
 	name: 'vnet-link'
 	location: 'global'
