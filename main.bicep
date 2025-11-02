@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.4'  
+var bicepRevision = '0.2.5'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -33,7 +33,7 @@ param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
 // Variables
 var imagePublisher = 'Canonical'
 var imageOffer = '0001-com-ubuntu-server-jammy'
-var imageSku = '22_04-lts-gen2'
+var imageSku = '22_04-lts-arm64'
 var imageVersion = 'latest'
 
 //last IP in PE subnet
@@ -380,6 +380,8 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 				name: 'pe-ipconfig'
 				properties: {
 					privateIPAddress: peSubnetLastIp
+                    groupId: 'file'
+                    memberName: 'file'
 				}
 			}
 		]

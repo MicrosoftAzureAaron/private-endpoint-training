@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "6790437712930653691"
+      "templateHash": "17180523327289866133"
     }
   },
   "parameters": {
@@ -93,10 +93,10 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.4",
+    "bicepRevision": "0.2.5",
     "imagePublisher": "Canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
-    "imageSku": "22_04-lts-gen2",
+    "imageSku": "22_04-lts-arm64",
     "imageVersion": "latest",
     "peSubnetLastIp": "10.0.3.254"
   },
@@ -486,7 +486,9 @@
           {
             "name": "pe-ipconfig",
             "properties": {
-              "privateIPAddress": "[variables('peSubnetLastIp')]"
+              "privateIPAddress": "[variables('peSubnetLastIp')]",
+              "groupId": "file",
+              "memberName": "file"
             }
           }
         ],
