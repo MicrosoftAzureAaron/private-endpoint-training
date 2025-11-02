@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "7260387513169015128"
+      "templateHash": "9057536597224445851"
     }
   },
   "parameters": {
@@ -16,6 +16,12 @@
     "routeTableVm2Name": {
       "type": "string",
       "defaultValue": "rt-vm2"
+    },
+    "firewallPrivateIpVm1": {
+      "type": "string"
+    },
+    "firewallPrivateIpVm2": {
+      "type": "string"
     },
     "vm1Name": {
       "type": "string",
@@ -85,6 +91,7 @@
     }
   },
   "variables": {
+    "bicepRevision": "0.1.7",
     "imageSku": "[if(contains(parameters('vmSize'), 'v6'), '2019-datacenter-g2', '2019-Datacenter')]"
   },
   "resources": [
@@ -93,6 +100,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('routeTableVm1Name')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "disableBgpRoutePropagation": false,
         "routes": [
@@ -101,20 +111,20 @@
             "properties": {
               "addressPrefix": "0.0.0.0/0",
               "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[reference(resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName')), '2023-09-01').ipConfigurations[0].properties.privateIPAddress]"
+              "nextHopIpAddress": "[parameters('firewallPrivateIpVm1')]"
             }
           }
         ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName'))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2023-09-01",
       "name": "[parameters('routeTableVm2Name')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "disableBgpRoutePropagation": false,
         "routes": [
@@ -123,48 +133,20 @@
             "properties": {
               "addressPrefix": "[parameters('vm2SubnetPrefix')]",
               "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[reference(resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName')), '2023-09-01').ipConfigurations[0].properties.privateIPAddress]"
+              "nextHopIpAddress": "[parameters('firewallPrivateIpVm2')]"
             }
           }
         ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/azureFirewalls', parameters('firewallName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks/subnets/routeTable",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}/{1}/{2}', parameters('vnetName'), 'VM1Subnet', 'routeTable')]",
-      "properties": {
-        "routeTable": {
-          "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTableVm1Name'))]"
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/routeTables', parameters('routeTableVm1Name'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks/subnets/routeTable",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}/{1}/{2}', parameters('vnetName'), 'VM2Subnet', 'routeTable')]",
-      "properties": {
-        "routeTable": {
-          "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTableVm2Name'))]"
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/routeTables', parameters('routeTableVm2Name'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2023-09-01",
       "name": "[format('{0}-nic', parameters('vm1Name'))]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "ipConfigurations": [
           {
@@ -186,6 +168,9 @@
       "apiVersion": "2023-09-01",
       "name": "[format('{0}-nic', parameters('vm2Name'))]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "ipConfigurations": [
           {
@@ -207,6 +192,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('vm1Name')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -244,6 +232,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('vm2Name')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -281,6 +272,9 @@
       "apiVersion": "2023-09-01",
       "name": "[format('{0}-pip', parameters('firewallName'))]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "sku": {
         "name": "Standard"
       },
@@ -293,6 +287,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('firewallName')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "sku": {
           "name": "AZFW_VNet",
@@ -321,13 +318,19 @@
       "type": "Microsoft.Network/privateDnsZones",
       "apiVersion": "2024-06-01",
       "name": "[parameters('dnsZoneName')]",
-      "location": "global"
+      "location": "global",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      }
     },
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
       "apiVersion": "2024-06-01",
       "name": "[format('{0}/{1}', parameters('dnsZoneName'), 'vnet-link')]",
       "location": "global",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "virtualNetwork": {
           "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
@@ -344,6 +347,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('privateEndpointName')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "subnet": {
           "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName')), '2023-09-01').subnets[2].id]"
@@ -370,6 +376,9 @@
       "apiVersion": "2023-01-01",
       "name": "[parameters('storageAccountName')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "sku": {
         "name": "Standard_LRS"
       },
@@ -392,6 +401,9 @@
       "apiVersion": "2023-09-01",
       "name": "[parameters('vnetName')]",
       "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -408,7 +420,10 @@
           {
             "name": "VM1Subnet",
             "properties": {
-              "addressPrefix": "[parameters('vm1SubnetPrefix')]"
+              "addressPrefix": "[parameters('vm1SubnetPrefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTableVm1Name'))]"
+              }
             }
           },
           {
@@ -419,7 +434,10 @@
             }
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', parameters('routeTableVm1Name'))]"
+      ]
     }
   ]
 }

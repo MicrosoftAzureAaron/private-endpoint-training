@@ -1,10 +1,18 @@
+// Revision number for tracking deployments
+var bicepRevision = '0.1.7'  // Increment this value each time the Bicep file is updated
 // Route tables for subnets
 param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
 
+// Get the private IP address of the Azure Firewall (use a parameter to break the cycle)
+param firewallPrivateIpVm1 string
+
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		disableBgpRoutePropagation: false
 		routes: [
@@ -13,16 +21,22 @@ resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 				properties: {
 					addressPrefix: '0.0.0.0/0'
 					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: azureFirewall.properties.ipConfigurations[0].properties.privateIPAddress
+					// Use a parameter for the firewall private IP to break the cycle
+					nextHopIpAddress: firewallPrivateIpVm1
 				}
 			}
 		]
 	}
 }
 
+param firewallPrivateIpVm2 string
+
 resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm2Name
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		disableBgpRoutePropagation: false
 			routes: [
@@ -31,42 +45,16 @@ resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 					properties: {
 						addressPrefix: vm2SubnetPrefix
 						nextHopType: 'VirtualAppliance'
-						nextHopIpAddress: azureFirewall.properties.ipConfigurations[0].properties.privateIPAddress
+						nextHopIpAddress: firewallPrivateIpVm2
 					}
 				}
 			]
 	}
 }
 
-resource vm1Subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' existing = {
-  parent: vnet
-  name: 'VM1Subnet'
-}
+// The route table association is now handled inline in the VNet subnet definition.
 
-resource vm1SubnetRouteTableAssoc 'Microsoft.Network/virtualNetworks/subnets/routeTable@2023-09-01' = {
-  parent: vm1Subnet
-  name: 'routeTable'
-  properties: {
-	routeTable: {
-	  id: routeTableVm1.id
-	}
-  }
-}
-
-resource vm2Subnet 'Microsoft.Network/virtualNetworks/subnets@2023-09-01' existing = {
-  parent: vnet
-  name: 'VM2Subnet'
-}
-
-resource vm2SubnetRouteTableAssoc 'Microsoft.Network/virtualNetworks/subnets/routeTable@2023-09-01' = {
-	parent: vm2Subnet
-	name: 'routeTable'
-	properties: {
-		routeTable: {
-			id: routeTableVm2.id
-		}
-	}
-}
+// The route table association is now handled inline in the VNet subnet definition.
 // Two VMs in different subnets
 param vm1Name string = 'training-vm1'
 param vm2Name string = 'training-vm2'
@@ -87,7 +75,10 @@ var imageSku = contains(vmSize, 'v6') ? '2019-datacenter-g2' : '2019-Datacenter'
 
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 	name: '${vm1Name}-nic'
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		ipConfigurations: [
 			{
@@ -104,7 +95,10 @@ resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 
 resource vm2Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 	name: '${vm2Name}-nic'
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		ipConfigurations: [
 			{
@@ -121,7 +115,10 @@ resource vm2Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 
 resource vm1 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 	name: vm1Name
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 			hardwareProfile: {
 				vmSize: vmSize
@@ -154,7 +151,10 @@ resource vm1 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 
 resource vm2 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 	name: vm2Name
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 			hardwareProfile: {
 				vmSize: vmSize
@@ -188,7 +188,10 @@ resource vm2 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 param firewallName string = 'training-firewall'
 resource firewallPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
 	name: '${firewallName}-pip'
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	sku: {
 		name: 'Standard'
 	}
@@ -199,7 +202,10 @@ resource firewallPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	name: firewallName
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		sku: {
 			name: 'AZFW_VNet'
@@ -225,13 +231,19 @@ param dnsZoneName string = 'privatelink.file.${environment().suffixes.storage}'
 // For multi-cloud, use: '${environment().suffixes.storageEndpointSuffix}' if needed
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
 	name: dnsZoneName
-	location: 'global'
+		location: 'global'
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 }
 
 resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
 	parent: privateDnsZone
 	name: 'vnet-link'
-	location: 'global'
+		location: 'global'
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		virtualNetwork: {
 			id: vnet.id
@@ -243,7 +255,10 @@ resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@
 param privateEndpointName string = 'training-pe'
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 	name: privateEndpointName
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		subnet: {
 			id: vnet.properties.subnets[2].id
@@ -263,7 +278,10 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 	name: storageAccountName
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	sku: {
 		name: 'Standard_LRS'
 	}
@@ -291,7 +309,10 @@ param vm2SubnetPrefix string = '10.0.3.0/24'
 
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 	name: vnetName
-	location: location
+		location: location
+		tags: {
+			bicepRevision: string(bicepRevision)
+		}
 	properties: {
 		addressSpace: {
 			addressPrefixes: [vnetAddressPrefix]
@@ -307,6 +328,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 				name: 'VM1Subnet'
 				properties: {
 					addressPrefix: vm1SubnetPrefix
+					routeTable: {
+						id: routeTableVm1.id
+					}
 				}
 			}
 			{
