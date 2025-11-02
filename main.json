@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "14791549376601714653"
+      "templateHash": "14655039609766292737"
     }
   },
   "parameters": {
@@ -93,7 +93,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.1.7",
+    "bicepRevision": "0.1.8",
     "imageSku": "[if(contains(parameters('vmSize'), 'v6'), '2019-datacenter-g2', '2019-Datacenter')]"
   },
   "resources": [

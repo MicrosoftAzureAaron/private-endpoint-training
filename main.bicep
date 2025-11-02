@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.1.7'  // Increment this value each time the Bicep file is updated
+var bicepRevision = '0.1.8'  // Increment this value each time the Bicep file is updated
 // Route tables for subnets
 param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
@@ -70,7 +70,6 @@ param adminPassword string
 ])
 param vmSize string = 'Standard_DS1_v2' // Make VM size selectable and default to a widely available size
 
-// Select image SKU based on VM size (Gen2 for v6 SKUs, Gen1 otherwise)
 var imageSku = contains(vmSize, 'v6') ? '2019-datacenter-g2' : '2019-Datacenter'
 
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
