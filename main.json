@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "15637370252854172135"
+      "templateHash": "9365406262665784819"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.13",
+    "bicepRevision": "0.2.15",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "firewallSubnetPrefix": "10.0.0.0/24",
@@ -323,28 +323,14 @@
           }
         ],
         "firewallPolicy": {
-          "id": "[resourceId('Microsoft.Network/firewallPolicies', format('{0}-policy', variables('firewallName')))]"
+          "id": "[reference(resourceId('Microsoft.Resources/deployments', 'azureFirewallAllowPolicy'), '2025-04-01').outputs.firewallPolicyId.value]"
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/firewallPolicies', format('{0}-policy', variables('firewallName')))]",
+        "[resourceId('Microsoft.Resources/deployments', 'azureFirewallAllowPolicy')]",
         "[resourceId('Microsoft.Network/publicIPAddresses', 'firewall-pip')]",
         "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
       ]
-    },
-    {
-      "type": "Microsoft.Network/firewallPolicies",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}-policy', variables('firewallName'))]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "sku": {
-          "tier": "Standard"
-        }
-      }
     },
     {
       "type": "Microsoft.Network/privateDnsZones",
@@ -450,6 +436,111 @@
           "defaultAction": "Deny"
         },
         "isHnsEnabled": false
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "azureFirewallAllowPolicy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.38.33.27573",
+              "templateHash": "8857760263483066028"
+            }
+          },
+          "variables": {
+            "firewallPolicies_AzureFirewallAllowPolicy_name": "AllowPolicy"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/firewallPolicies",
+              "apiVersion": "2024-05-01",
+              "name": "[variables('firewallPolicies_AzureFirewallAllowPolicy_name')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "sku": {
+                  "tier": "Standard"
+                },
+                "threatIntelMode": "Off",
+                "threatIntelWhitelist": {
+                  "fqdns": [],
+                  "ipAddresses": []
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
+              "apiVersion": "2024-05-01",
+              "name": "[format('{0}/{1}', variables('firewallPolicies_AzureFirewallAllowPolicy_name'), 'DefaultNetworkRuleCollectionGroup')]",
+              "properties": {
+                "priority": 100,
+                "ruleCollections": [
+                  {
+                    "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                    "action": {
+                      "type": "Allow"
+                    },
+                    "rules": [
+                      {
+                        "ruleType": "NetworkRule",
+                        "name": "AllowALL",
+                        "ipProtocols": [
+                          "ANY"
+                        ],
+                        "sourceAddresses": [
+                          "*"
+                        ],
+                        "sourceIpGroups": [],
+                        "destinationAddresses": [
+                          "*"
+                        ],
+                        "destinationIpGroups": [],
+                        "destinationFqdns": [],
+                        "destinationPorts": [
+                          "*"
+                        ]
+                      }
+                    ],
+                    "name": "AllowALL",
+                    "priority": 500
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicies_AzureFirewallAllowPolicy_name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/azureFirewalls",
+              "apiVersion": "2024-05-01",
+              "name": "myAzureFirewall",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "firewallPolicy": {
+                  "id": "[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicies_AzureFirewallAllowPolicy_name'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicies_AzureFirewallAllowPolicy_name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "firewallPolicyId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicies_AzureFirewallAllowPolicy_name'))]"
+            }
+          }
+        }
       }
     }
   ]

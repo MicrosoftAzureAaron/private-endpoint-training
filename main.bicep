@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.13'  
+var bicepRevision = '0.2.15'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -43,8 +43,8 @@ resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
 	location: location
 	tags: {
-		bicepRevision: string(bicepRevision) 
-  }
+		bicepRevision: string(bicepRevision)
+	}
 	properties: {
 		disableBgpRoutePropagation: false
 		routes: [
@@ -53,7 +53,6 @@ resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 				properties: {
 					addressPrefix: '0.0.0.0/0'
 					nextHopType: 'VirtualAppliance'
-					// Use a parameter for the firewall private IP to break the cycle
 					nextHopIpAddress: firewallPrivateIp
 				}
 			}
@@ -282,23 +281,15 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 				}
 			}
 		]
-		firewallPolicy: {
-			id: firewallPolicy.id
+			firewallPolicy: {
+				id: azureFirewallAllowPolicy.outputs.firewallPolicyId
+			}
 		}
 	}
-}
 
-resource firewallPolicy 'Microsoft.Network/firewallPolicies@2023-09-01' = {
-	name: '${firewallName}-policy'
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		sku: {
-			tier: 'Standard'
-		}
-	}
+module azureFirewallAllowPolicy 'AzureFirewallAllowPolicy.bicep' = {
+	name: 'azureFirewallAllowPolicy'
+
 }
 
 
@@ -396,6 +387,8 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 		isHnsEnabled: false
   }
 }
+
+
 
 
 
