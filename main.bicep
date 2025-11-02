@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.17'  
+var bicepRevision = '0.2.18'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -101,6 +101,8 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 				name: 'AzureFirewallSubnet'
 				properties: {
 					addressPrefix: firewallSubnetPrefix
+					privateEndpointNetworkPolicies: 'Disabled'
+					privateLinkServiceNetworkPolicies: 'Enabled'
 				}
 			}
 			{
@@ -110,6 +112,8 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 					routeTable: {
 						id: routeTableVm1.id
 					}
+					privateEndpointNetworkPolicies: 'Disabled'
+					privateLinkServiceNetworkPolicies: 'Enabled'
 				}
 			}
 			{
@@ -119,13 +123,16 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 					routeTable: {
 						id: routeTableVm2.id
 					}
+					privateEndpointNetworkPolicies: 'Disabled'
+					privateLinkServiceNetworkPolicies: 'Enabled'
 				}
 			}
 			{
 				name: 'PESubnet'
 				properties: {
 					addressPrefix: peSubnetPrefix
-					privateEndpointNetworkPolicies: 'Enabled'
+					privateEndpointNetworkPolicies: 'RouteTableEnabled'
+					privateLinkServiceNetworkPolicies: 'Enabled'
 				}
 			}
 		]
@@ -389,6 +396,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 		isHnsEnabled: false
   }
 }
+
 
 
 

@@ -50,14 +50,20 @@ This template deploys a secure Azure environment for private endpoint training, 
 ### VM1 Effective Routes
 ![VM1 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm1effectiveroutes.png)
 
-### VM2 Effective Routes
-![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutes.png)
+### VM2 Effective Routes, Route Table with PE Subnet IP prefix Route
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutesSubnetRoute.png)
+
+### VM2 Effective Routes, Route Table with VNET IP prefix Route
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutesVNETRoute.png)
+
+### VM2 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutes2LargeRoute.png)
 
 ## Deploy to Azure
 
 To deploy this template in your Azure subscription, use the button below:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.2.17)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.2.18)
 
 > **Tip:** You can right-click the Deploy to Azure button and select "Open link in new tab," or hold **Ctrl** (Windows) / **Cmd** (Mac) and click the button to open the deployment portal in a new tab.
 
@@ -70,7 +76,7 @@ This template is designed for secure, segmented access to Azure Storage via priv
 
 ### Route Tables & Private Endpoint Policies Impact
 
-- **VM1Subnet:** Routes all outbound traffic (`0.0.0.0/0`) through the Azure Firewall, but unless a specific route for the private endpoint subnet (or a smaller prefix) is present, traffic to the private endpoint will follow Azure's default routing and bypass the firewall—even if private endpoint policies are enabled.
+- **VM1Subnet:** Routes all outbound traffic (`0.0.0.0/0`) through the Azure Firewall, but unless a specific route for the private endpoint subnet (or a smaller prefix) is present, traffic to the private endpoint will follow Azure's default routing and bypass the firewall, even if private endpoint policies are enabled on the private endpoint subnet. 
 
 - **VM2Subnet:** With private endpoint policies enabled on the PE subnet and a route for the PE subnet (or a more specific prefix) in the VM2 route table, traffic to the private endpoint is forced through the Azure Firewall for inspection and control.
 
@@ -78,6 +84,7 @@ This template is designed for secure, segmented access to Azure Storage via priv
 VNET (or a more specific prefix) in the VM subnet's route table, pointing to the Azure Firewall as the next hop. If this override route is missing, private endpoint traffic will not be inspected by the firewall.
 
 For questions or improvements, please open an issue or contact the author.
+
 
 
 
