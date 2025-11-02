@@ -1,18 +1,18 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.9b'  
+var bicepRevision = '0.2.9c'  
 
 // Parameters
 param location string = resourceGroup().location
-param vnetName string = 'training-vnet'
-param vnetAddressPrefix string = '10.0.0.0/16'
-param firewallSubnetPrefix string = '10.0.0.0/24'
-param vm1SubnetPrefix string = '10.0.1.0/24'
-param vm2SubnetPrefix string = '10.0.2.0/24'
-param peSubnetPrefix string = '10.0.3.0/24'
-param routeTableVm1Name string = 'rt-vm1'
-param routeTableVm2Name string = 'rt-vm2'
-param vm1Name string = 'training-vm1'
-param vm2Name string = 'training-vm2'
+var vnetName = 'training-vnet'
+var vnetAddressPrefix = '10.0.0.0/16'
+var firewallSubnetPrefix = '10.0.0.0/24'
+var vm1SubnetPrefix = '10.0.1.0/24'
+var vm2SubnetPrefix = '10.0.2.0/24'
+var peSubnetPrefix = '10.0.3.0/24'
+var routeTableVm1Name = 'rt-vm1'
+var routeTableVm2Name = 'rt-vm2'
+var vm1Name = 'training-vm1'
+var vm2Name = 'training-vm2'
 param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
@@ -24,11 +24,11 @@ param adminPassword string
 	'Standard_B4ps_v2'
 ])
 param vmSize string = 'Standard_B2ps_v2'
-param firewallName string = 'training-firewall'
-param firewallPrivateIp string = '10.0.0.4'
-param dnsZoneName string = 'privatelink.file.${environment().suffixes.storage}'
-param privateEndpointName string = 'training-pe'
-param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
+var firewallName = 'training-firewall'
+var firewallPrivateIp = '10.0.0.4'
+var dnsZoneName = 'privatelink.file.${environment().suffixes.storage}'
+var privateEndpointName = 'training-pe'
+var storageAccountName = 'trngstor${uniqueString(resourceGroup().id)}'
 
 // Variables
 var imagePublisher = 'Canonical'
