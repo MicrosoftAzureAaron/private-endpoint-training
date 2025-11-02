@@ -1,13 +1,13 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.1'  // Increment this value each time the Bicep file is updated
+var bicepRevision = '0.2.2'  // Increment this value each time the Bicep file is updated
 
 // Parameters
 param location string = resourceGroup().location
 param vnetName string = 'training-vnet'
 param firewallSubnetPrefix string = '10.0.0.0/24'
 param vm1SubnetPrefix string = '10.0.1.0/24'
-param vm2SubnetPrefix string = '10.0.3.0/24'
-param peSubnetPrefix string = '10.0.4.0/28' // New subnet for private endpoint
+param vm2SubnetPrefix string = '10.0.2.0/24'
+param peSubnetPrefix string = '10.0.255.0/24' // New subnet for private endpoint
 param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
 param vm1Name string = 'training-vm1'
@@ -24,8 +24,7 @@ param adminPassword string
 ])
 param vmSize string = 'Standard_B2ps_v2'
 param firewallName string = 'training-firewall'
-param firewallPrivateIpVm1 string = '10.0.1.4'
-param firewallPrivateIpVm2 string = '10.0.3.4'
+param firewallPrivateIp string = '10.0.1.4'
 param dnsZoneName string = 'privatelink.file.${environment().suffixes.storage}'
 param privateEndpointName string = 'training-pe'
 param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
@@ -38,7 +37,7 @@ var imageVersion = 'latest'
 
 // Helper: Get last IP in PE subnet
 // ...existing code...
-var peSubnetLastIp = '10.0.4.15' // For /28, last usable IP is .15
+var peSubnetLastIp = '10.0.4.254' 
 
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
@@ -55,7 +54,7 @@ resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 					addressPrefix: '0.0.0.0/0'
 					nextHopType: 'VirtualAppliance'
 					// Use a parameter for the firewall private IP to break the cycle
-					nextHopIpAddress: firewallPrivateIpVm1
+					nextHopIpAddress: firewallPrivateIp
 				}
 			}
 		]
@@ -77,7 +76,7 @@ resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 				properties: {
 					addressPrefix: vm2SubnetPrefix
 					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIpVm2
+					nextHopIpAddress: firewallPrivateIp
 				}
 			}
 		]
