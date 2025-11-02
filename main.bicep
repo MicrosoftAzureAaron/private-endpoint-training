@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.9'  
+var bicepRevision = '0.2.9a'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -294,7 +294,9 @@ resource firewallPolicy 'Microsoft.Network/firewallPolicies@2023-09-01' = {
 	tags: {
 		bicepRevision: string(bicepRevision)
 	}
-	properties: {}
+	properties: {
+		// Empty, rule collection group is added as a child resource below
+	}
 }
 
 // Define rule collection group as a child resource
@@ -304,7 +306,7 @@ resource firewallPolicyRuleCollectionGroup 'Microsoft.Network/firewallPolicies/r
 	properties: {
 		ruleCollections: [
 			{
-				name: 'AllowAnyAny'
+				name: 'AllowAll'
 				ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
 				priority: 100
 				action: {
@@ -312,7 +314,7 @@ resource firewallPolicyRuleCollectionGroup 'Microsoft.Network/firewallPolicies/r
 				}
 				rules: [
 					{
-						name: 'AllowAnyAnyRule'
+						name: 'AllowAllRule'
 						ruleType: 'NetworkRule'
 						sourceAddresses: ['*']
 						destinationAddresses: ['*']
