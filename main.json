@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "6685101482696811693"
+      "templateHash": "2715432470847155821"
     }
   },
   "parameters": {
@@ -313,7 +313,7 @@
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
       "apiVersion": "2023-05-01",
-      "name": "[format('{0}-vnet-link', parameters('dnsZoneName'))]",
+      "name": "[format('{0}/{1}', parameters('dnsZoneName'), 'vnet-link')]",
       "location": "global",
       "properties": {
         "virtualNetwork": {

@@ -218,7 +218,8 @@ resource privateDnsZone 'Microsoft.Network/privateDnsZones@2023-05-01' = {
 }
 
 resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2023-05-01' = {
-	name: '${dnsZoneName}-vnet-link'
+	parent: privateDnsZone
+	name: 'vnet-link'
 	location: 'global'
 	properties: {
 		virtualNetwork: {
@@ -226,7 +227,6 @@ resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@
 		}
 		registrationEnabled: false
 	}
-		dependsOn: [privateDnsZone]
 }
 // Private Endpoint for File access to Storage Account in VM2Subnet
 param privateEndpointName string = 'training-pe'
