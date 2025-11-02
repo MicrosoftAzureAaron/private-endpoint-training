@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.12'  
+var bicepRevision = '0.2.13'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -264,9 +264,6 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	tags: {
 		bicepRevision: string(bicepRevision)
 	}
-	dependsOn: [
-		firewallPolicy
-	]
 	properties: {
 		sku: {
 			name: 'AZFW_VNet'
@@ -298,37 +295,12 @@ resource firewallPolicy 'Microsoft.Network/firewallPolicies@2023-09-01' = {
 		bicepRevision: string(bicepRevision)
 	}
 	properties: {
-		// Empty, rule collection group is added as a child resource below
+		sku: {
+			tier: 'Standard'
+		}
 	}
 }
 
-// Define rule collection group as a child resource
-resource firewallPolicyRuleCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2023-09-01' = {
-	name: 'PETrainingRCG'
-	parent: firewallPolicy
-	properties: {
-		ruleCollections: [
-			{
-				name: 'AllowAll'
-				ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
-				priority: 100
-				action: {
-					type: 'Allow'
-				}
-				rules: [
-					{
-						name: 'AllowAllRule'
-						ruleType: 'NetworkRule'
-						sourceAddresses: ['*']
-						destinationAddresses: ['*']
-						destinationPorts: ['*']
-						ipProtocols: ['Any']
-					}
-				]
-			}
-		]
-	}
-}
 
 // Private DNS Zone for Storage Account private endpoint
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
@@ -424,6 +396,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 		isHnsEnabled: false
   }
 }
+
 
 
 

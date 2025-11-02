@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "7877755462163604272"
+      "templateHash": "15637370252854172135"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.12",
+    "bicepRevision": "0.2.13",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "firewallSubnetPrefix": "10.0.0.0/24",
@@ -340,45 +340,11 @@
       "tags": {
         "bicepRevision": "[string(variables('bicepRevision'))]"
       },
-      "properties": {}
-    },
-    {
-      "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}/{1}', format('{0}-policy', variables('firewallName')), 'PETrainingRCG')]",
       "properties": {
-        "ruleCollections": [
-          {
-            "name": "AllowAll",
-            "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
-            "priority": 100,
-            "action": {
-              "type": "Allow"
-            },
-            "rules": [
-              {
-                "name": "AllowAllRule",
-                "ruleType": "NetworkRule",
-                "sourceAddresses": [
-                  "*"
-                ],
-                "destinationAddresses": [
-                  "*"
-                ],
-                "destinationPorts": [
-                  "*"
-                ],
-                "ipProtocols": [
-                  "Any"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/firewallPolicies', format('{0}-policy', variables('firewallName')))]"
-      ]
+        "sku": {
+          "tier": "Standard"
+        }
+      }
     },
     {
       "type": "Microsoft.Network/privateDnsZones",
