@@ -1,13 +1,17 @@
+## Expected VM IPs
+- VM1: `10.0.1.4` (first available in VM1Subnet)
+- VM2: `10.0.2.4` (first available in VM2Subnet)
 # Private Endpoint Training Deployment
 
 This template deploys a secure Azure environment for private endpoint training, including:
 
-- **Virtual Network (VNET)**: Address space `10.0.0.0/16` with three subnets:
-  - `AzureFirewallSubnet`: `10.0.1.0/24` (for Azure Firewall)
-  - `VM1Subnet`: `10.0.2.0/24` (for VM1)
-  - `VM2Subnet`: `10.0.3.0/24` (for VM2, with private endpoint policies enabled)
+-- **Virtual Network (VNET)**: Address space `10.0.0.0/16` with four subnets:
+  - `AzureFirewallSubnet`: `10.0.0.0/24` (for Azure Firewall)
+  - `VM1Subnet`: `10.0.1.0/24` (for VM1)
+  - `VM2Subnet`: `10.0.2.0/24` (for VM2, with private endpoint policies enabled)
+  - `PESubnet`: `10.0.3.0/24` (for Private Endpoint)
 - **Storage Account**: With File service enabled, secured by a private endpoint.
-- **Private Endpoint**: For File access to the Storage Account, deployed in `VM2Subnet`.
+- **Private Endpoint**: For File access to the Storage Account, deployed in `PESubnet` (IP: `10.0.3.254`).
 - **Private DNS Zone**: For the Storage Account's private endpoint, linked to the VNET.
 - **Azure Firewall**: Deployed in `AzureFirewallSubnet`.
 - **Two Virtual Machines**:
@@ -19,9 +23,12 @@ This template deploys a secure Azure environment for private endpoint training, 
 
 ## IP Ranges
 - VNET: `10.0.0.0/16`
-- AzureFirewallSubnet: `10.0.1.0/24`
-- VM1Subnet: `10.0.2.0/24`
-- VM2Subnet: `10.0.3.0/24`
+- AzureFirewallSubnet: `10.0.0.0/24`
+- VM1Subnet: `10.0.1.0/24`
+- VM2Subnet: `10.0.2.0/24`
+- PESubnet: `10.0.3.0/24`
+## Private Endpoint IP
+- Private Endpoint IP: `10.0.3.254` (last IP in PESubnet)
 
 
 ## Route Table Details
