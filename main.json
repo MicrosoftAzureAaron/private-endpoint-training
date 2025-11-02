@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "17180523327289866133"
+      "templateHash": "16497699313640429269"
     }
   },
   "parameters": {
@@ -93,7 +93,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.5",
+    "bicepRevision": "0.2.6",
     "imagePublisher": "Canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
     "imageSku": "22_04-lts-arm64",
@@ -137,7 +137,7 @@
           {
             "name": "pe-to-firewall",
             "properties": {
-              "addressPrefix": "[parameters('vm2SubnetPrefix')]",
+              "addressPrefix": "[parameters('peSubnetPrefix')]",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[parameters('firewallPrivateIp')]"
             }

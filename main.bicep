@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.5'  
+var bicepRevision = '0.2.6'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -74,7 +74,7 @@ resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 			{
 				name: 'pe-to-firewall'
 				properties: {
-					addressPrefix: vm2SubnetPrefix
+					addressPrefix: peSubnetPrefix
 					nextHopType: 'VirtualAppliance'
 					nextHopIpAddress: firewallPrivateIp
 				}
