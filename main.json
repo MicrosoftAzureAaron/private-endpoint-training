@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "4753417653458597010"
+      "templateHash": "7877755462163604272"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.9ca",
+    "bicepRevision": "0.2.12",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "firewallSubnetPrefix": "10.0.0.0/24",
