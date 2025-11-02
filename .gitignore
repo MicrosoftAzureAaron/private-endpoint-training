@@ -1,2 +1,3 @@
 # Ignore the revision update script
 update-revision.ps1
+HubAZFW.bicep
