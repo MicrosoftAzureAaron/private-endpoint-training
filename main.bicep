@@ -8,7 +8,7 @@ param vnetAddressPrefix string = '10.0.0.0/16'
 param firewallSubnetPrefix string = '10.0.0.0/24'
 param vm1SubnetPrefix string = '10.0.1.0/24'
 param vm2SubnetPrefix string = '10.0.2.0/24'
-param peSubnetPrefix string = '10.0.3.0/24' // New subnet for private endpoint
+param peSubnetPrefix string = '10.0.3.0/24'
 param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
 param vm1Name string = 'training-vm1'
@@ -36,8 +36,7 @@ var imageOffer = '0001-com-ubuntu-server-jammy'
 var imageSku = '22_04-lts-gen2'
 var imageVersion = 'latest'
 
-// Helper: Get last IP in PE subnet
-// ...existing code...
+//last IP in PE subnet
 var peSubnetLastIp = '10.0.3.254' 
 
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
@@ -84,12 +83,7 @@ resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 	}
 }
 
-// The route table association is now handled inline in the VNet subnet definition.
-
-// The route table association is now handled inline in the VNet subnet definition.
 // Two VMs in different subnets
-// ...existing code...
-
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 	name: vnetName
 	location: location
@@ -265,8 +259,6 @@ resource firewallPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
   }
 }
 
-// ...existing code...
-
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	name: firewallName
 	location: location
@@ -335,7 +327,6 @@ resource firewallPolicyRuleCollectionGroup 'Microsoft.Network/firewallPolicies/r
 }
 
 // Private DNS Zone for Storage Account private endpoint
-// For multi-cloud, use: '${environment().suffixes.storageEndpointSuffix}' if needed
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
 	name: dnsZoneName
 		location: 'global'
@@ -358,8 +349,7 @@ resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@
 		registrationEnabled: false
 	}
 }
-// Private Endpoint for File access to Storage Account in VM2Subnet
-// ...existing code...
+
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 	name: privateEndpointName
 	location: location
@@ -390,8 +380,8 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 		]
 	}
 }
+
 // Storage Account with File service enabled
-// ...existing code...
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 	name: storageAccountName
 		location: location
@@ -412,6 +402,5 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 			defaultAction: 'Deny'
 		}
 		isHnsEnabled: false
-// ...existing code...
   }
 }
