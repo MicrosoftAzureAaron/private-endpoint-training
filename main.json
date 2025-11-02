@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "9057536597224445851"
+      "templateHash": "14791549376601714653"
     }
   },
   "parameters": {
@@ -18,10 +18,12 @@
       "defaultValue": "rt-vm2"
     },
     "firewallPrivateIpVm1": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "10.0.1.4"
     },
     "firewallPrivateIpVm2": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "10.0.1.4"
     },
     "vm1Name": {
       "type": "string",

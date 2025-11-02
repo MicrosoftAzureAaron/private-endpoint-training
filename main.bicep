@@ -5,7 +5,7 @@ param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
 
 // Get the private IP address of the Azure Firewall (use a parameter to break the cycle)
-param firewallPrivateIpVm1 string
+param firewallPrivateIpVm1 string = '10.0.1.4'
 
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
@@ -29,7 +29,7 @@ resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	}
 }
 
-param firewallPrivateIpVm2 string
+param firewallPrivateIpVm2 string = '10.0.1.4'
 
 resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm2Name
