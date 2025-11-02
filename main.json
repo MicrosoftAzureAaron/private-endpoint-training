@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "2715432470847155821"
+      "templateHash": "9384987590383954718"
     }
   },
   "parameters": {
@@ -32,6 +32,10 @@
     "adminPassword": {
       "type": "securestring"
     },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_B2s"
+    },
     "firewallName": {
       "type": "string",
       "defaultValue": "training-firewall"
@@ -46,7 +50,7 @@
     },
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "[format('trainingstorage{0}', uniqueString(resourceGroup().id))]"
+      "defaultValue": "[format('trngstor{0}', uniqueString(resourceGroup().id))]"
     },
     "location": {
       "type": "string",
@@ -196,7 +200,7 @@
       "location": "[parameters('location')]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_B2s"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[parameters('vm1Name')]",
@@ -233,7 +237,7 @@
       "location": "[parameters('location')]",
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_B2s"
+          "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
           "computerName": "[parameters('vm2Name')]",

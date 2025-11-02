@@ -73,6 +73,7 @@ param vm2Name string = 'training-vm2'
 param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
+param vmSize string = 'Standard_B2s' // Make VM size selectable
 
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 	name: '${vm1Name}-nic'
@@ -112,9 +113,9 @@ resource vm1 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 	name: vm1Name
 	location: location
 	properties: {
-		hardwareProfile: {
-			vmSize: 'Standard_B2s'
-		}
+			hardwareProfile: {
+				vmSize: vmSize
+			}
 		osProfile: {
 			computerName: vm1Name
 			adminUsername: adminUsername
@@ -145,9 +146,9 @@ resource vm2 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 	name: vm2Name
 	location: location
 	properties: {
-		hardwareProfile: {
-			vmSize: 'Standard_B2s'
-		}
+			hardwareProfile: {
+				vmSize: vmSize
+			}
 		osProfile: {
 			computerName: vm2Name
 			adminUsername: adminUsername
@@ -249,7 +250,7 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 	}
 }
 // Storage Account with File service enabled
-param storageAccountName string = 'trainingstorage${uniqueString(resourceGroup().id)}'
+param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 	name: storageAccountName
 	location: location
