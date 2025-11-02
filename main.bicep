@@ -62,13 +62,13 @@ param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
 @allowed([
-	'Standard_DS1_v2'
-	'Standard_B2ms'
-	'Standard_D2s_v3'
-	'Standard_D2_v2'
-	'Standard_F2s_v2'
+'Standard_B2pls_v2'
+'Standard_B2ps_v2'
+'Standard_B2pts_v2'
+'Standard_B4pls_v2'
+'Standard_B4ps_v2'
 ])
-param vmSize string = 'Standard_DS1_v2' // Make VM size selectable and default to a widely available size
+param vmSize string = 'Standard_B2ps_v2' // Make VM size selectable and default to a widely available size
 
 var imageSku = contains(vmSize, 'v6') ? '2019-datacenter-g2' : '2019-Datacenter'
 
