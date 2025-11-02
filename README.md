@@ -19,7 +19,12 @@ This template deploys a secure Azure environment for private endpoint training, 
   - VM2 in `VM2Subnet`
 - **Route Tables**:
   - VM1Subnet: Default route (`0.0.0.0/0`) to Azure Firewall
-  - VM2Subnet: Route for private endpoint traffic to Azure Firewall, with private endpoint policies enabled on the **private endpoint** SUBNET
+  - VM2Subnet: Route for private endpoint traffic to Azure Firewall
+    - The Address Prefix for the Overriding Route must be >= /32
+      - Greater than or Equal to the Private Endpoint IP address
+    - The Address prefix for the overriding route must be <= /16
+      - Less than or equal to the VNET IP prefix
+  - Private Endpoint subnet: Private endpoint policies for route tables enabled only on PE subnet
 
 ## IP Ranges
 - VNET: `10.0.0.0/16`
