@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "4584203130646278869"
+      "templateHash": "2546786294119994462"
     }
   },
   "parameters": {
@@ -76,6 +76,9 @@
       "type": "string",
       "defaultValue": "10.0.3.0/24"
     }
+  },
+  "variables": {
+    "imageSku": "[if(contains(parameters('vmSize'), 'v6'), '2019-datacenter-g2', '2019-Datacenter')]"
   },
   "resources": [
     {
@@ -211,7 +214,7 @@
           "imageReference": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2019-Datacenter",
+            "sku": "[variables('imageSku')]",
             "version": "latest"
           },
           "osDisk": {
@@ -248,7 +251,7 @@
           "imageReference": {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
-            "sku": "2019-Datacenter",
+            "sku": "[variables('imageSku')]",
             "version": "latest"
           },
           "osDisk": {

@@ -75,6 +75,9 @@ param adminUsername string = 'azureuser'
 param adminPassword string
 param vmSize string = 'Standard_B2s' // Make VM size selectable
 
+// Select image SKU based on VM size (Gen2 for v6 SKUs, Gen1 otherwise)
+var imageSku = contains(vmSize, 'v6') ? '2019-datacenter-g2' : '2019-Datacenter'
+
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 	name: '${vm1Name}-nic'
 	location: location
@@ -122,12 +125,12 @@ resource vm1 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 			adminPassword: adminPassword
 		}
 		storageProfile: {
-			imageReference: {
-				publisher: 'MicrosoftWindowsServer'
-				offer: 'WindowsServer'
-				sku: '2019-Datacenter'
-				version: 'latest'
-			}
+							imageReference: {
+								publisher: 'MicrosoftWindowsServer'
+								offer: 'WindowsServer'
+								sku: imageSku
+								version: 'latest'
+							}
 			osDisk: {
 				createOption: 'FromImage'
 			}
@@ -155,12 +158,12 @@ resource vm2 'Microsoft.Compute/virtualMachines@2023-09-01' = {
 			adminPassword: adminPassword
 		}
 		storageProfile: {
-			imageReference: {
-				publisher: 'MicrosoftWindowsServer'
-				offer: 'WindowsServer'
-				sku: '2019-Datacenter'
-				version: 'latest'
-			}
+							imageReference: {
+								publisher: 'MicrosoftWindowsServer'
+								offer: 'WindowsServer'
+								sku: imageSku
+								version: 'latest'
+							}
 			osDisk: {
 				createOption: 'FromImage'
 			}
