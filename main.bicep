@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.9c'  
+var bicepRevision = '0.2.9ca'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -424,3 +424,4 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 		isHnsEnabled: false
   }
 }
+
