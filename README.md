@@ -66,7 +66,16 @@ To deploy this template in your Azure subscription, use the button below:
 ---
 
 ## Template Overview
-This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control. VM2's subnet enforces private endpoint policies, while VM1's subnet routes all outbound traffic through the firewall.
+This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control.
+
+### Route Tables & Private Endpoint Policies Impact
+
+- **VM1Subnet:** Routes all outbound traffic (`0.0.0.0/0`) through the Azure Firewall, but unless a specific route for the private endpoint subnet (or a smaller prefix) is present, traffic to the private endpoint will follow Azure's default routing and bypass the firewall—even if private endpoint policies are enabled.
+
+- **VM2Subnet:** With private endpoint policies enabled on the PE subnet and a route for the PE subnet (or a more specific prefix) in the VM2 route table, traffic to the private endpoint is forced through the Azure Firewall for inspection and control.
+
+- **Critical Design Note:** To ensure all private endpoint traffic is inspected by the firewall, always add a route for the PE 
+VNET (or a more specific prefix) in the VM subnet's route table, pointing to the Azure Firewall as the next hop. If this override route is missing, private endpoint traffic will not be inspected by the firewall.
 
 For questions or improvements, please open an issue or contact the author.
 
