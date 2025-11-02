@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "9365406262665784819"
+      "templateHash": "2430094056074730643"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.15",
+    "bicepRevision": "0.2.16",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "firewallSubnetPrefix": "10.0.0.0/24",
@@ -45,6 +45,7 @@
     "vm1Name": "training-vm1",
     "vm2Name": "training-vm2",
     "firewallName": "training-firewall",
+    "firewallPolicyName": "training-firewall-policy",
     "firewallPrivateIp": "10.0.0.4",
     "dnsZoneName": "[format('privatelink.file.{0}', environment().suffixes.storage)]",
     "privateEndpointName": "training-pe",
@@ -447,6 +448,11 @@
           "scope": "inner"
         },
         "mode": "Incremental",
+        "parameters": {
+          "firewallPolicyName": {
+            "value": "[variables('firewallPolicyName')]"
+          }
+        },
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
@@ -454,11 +460,17 @@
             "_generator": {
               "name": "bicep",
               "version": "0.38.33.27573",
-              "templateHash": "8857760263483066028"
+              "templateHash": "7162382756712526374"
+            }
+          },
+          "parameters": {
+            "firewallPolicyName": {
+              "type": "string",
+              "defaultValue": "AllowPolicy"
             }
           },
           "variables": {
-            "firewallPolicies_AzureFirewallAllowPolicy_name": "AllowPolicy"
+            "firewallPolicies_AzureFirewallAllowPolicy_name": "[parameters('firewallPolicyName')]"
           },
           "resources": [
             {

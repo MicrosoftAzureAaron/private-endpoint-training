@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.15'  
+var bicepRevision = '0.2.16'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -25,6 +25,7 @@ param adminPassword string
 ])
 param vmSize string = 'Standard_B2ps_v2'
 var firewallName = 'training-firewall'
+var firewallPolicyName = 'training-firewall-policy'
 var firewallPrivateIp = '10.0.0.4'
 var dnsZoneName = 'privatelink.file.${environment().suffixes.storage}'
 var privateEndpointName = 'training-pe'
@@ -288,10 +289,11 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	}
 
 module azureFirewallAllowPolicy 'AzureFirewallAllowPolicy.bicep' = {
-	name: 'azureFirewallAllowPolicy'
-
+		name: 'azureFirewallAllowPolicy'
+		params: {
+			firewallPolicyName: firewallPolicyName
+		}
 }
-
 
 // Private DNS Zone for Storage Account private endpoint
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
@@ -387,6 +389,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 		isHnsEnabled: false
   }
 }
+
 
 
 

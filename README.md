@@ -65,7 +65,7 @@ To deploy this template in your Azure subscription:
 2. Click the button below to deploy the ARM template to your Azure subscription:
 
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.2.15)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.2.16)
 
 > **Note:** The button above will deploy the latest `main.json` from this GitHub repository's main branch.
 
@@ -75,6 +75,7 @@ To deploy this template in your Azure subscription:
 This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control. VM2's subnet enforces private endpoint policies, while VM1's subnet routes all outbound traffic through the firewall.
 
 For questions or improvements, please open an issue or contact the author.
+
 
 
 
