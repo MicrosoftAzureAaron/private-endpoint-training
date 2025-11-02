@@ -1,24 +1,51 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.0'  // Increment this value each time the Bicep file is updated
-// Route tables for subnets
+var bicepRevision = '0.2.1'  // Increment this value each time the Bicep file is updated
+
+// Parameters
+param location string = resourceGroup().location
+param vnetName string = 'training-vnet'
+param firewallSubnetPrefix string = '10.0.0.0/24'
+param vm1SubnetPrefix string = '10.0.1.0/24'
+param vm2SubnetPrefix string = '10.0.3.0/24'
+param peSubnetPrefix string = '10.0.4.0/28' // New subnet for private endpoint
 param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
-
-// Location parameter required for resources
-param location string = resourceGroup().location
-
-// Subnet address prefixes
-param vm2SubnetPrefix string = '10.0.3.0/24' // Update this value to match your network design
-
-// Get the private IP address of the Azure Firewall (use a parameter to break the cycle)
+param vm1Name string = 'training-vm1'
+param vm2Name string = 'training-vm2'
+param adminUsername string = 'azureuser'
+@secure()
+param adminPassword string
+@allowed([
+	'Standard_B2pls_v2'
+	'Standard_B2ps_v2'
+	'Standard_B2pts_v2'
+	'Standard_B4pls_v2'
+	'Standard_B4ps_v2'
+])
+param vmSize string = 'Standard_B2ps_v2'
+param firewallName string = 'training-firewall'
 param firewallPrivateIpVm1 string = '10.0.1.4'
+param firewallPrivateIpVm2 string = '10.0.3.4'
+param dnsZoneName string = 'privatelink.file.${environment().suffixes.storage}'
+param privateEndpointName string = 'training-pe'
+param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
+
+// Variables
+var imagePublisher = 'Canonical'
+var imageOffer = '0001-com-ubuntu-server-jammy'
+var imageSku = '22_04-lts-gen2'
+var imageVersion = 'latest'
+
+// Helper: Get last IP in PE subnet
+// ...existing code...
+var peSubnetLastIp = '10.0.4.15' // For /28, last usable IP is .15
 
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
 	location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+	tags: {
+		bicepRevision: string(bicepRevision) 
+  }
 	properties: {
 		disableBgpRoutePropagation: false
 		routes: [
@@ -35,26 +62,25 @@ resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	}
 }
 
-param firewallPrivateIpVm2 string = '10.0.1.4'
 
 resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm2Name
 	location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
 	properties: {
 		disableBgpRoutePropagation: false
-			routes: [
-				{
-					name: 'pe-to-firewall'
-					properties: {
-						addressPrefix: vm2SubnetPrefix
-						nextHopType: 'VirtualAppliance'
-						nextHopIpAddress: firewallPrivateIpVm2
-					}
+		routes: [
+			{
+				name: 'pe-to-firewall'
+				properties: {
+					addressPrefix: vm2SubnetPrefix
+					nextHopType: 'VirtualAppliance'
+					nextHopIpAddress: firewallPrivateIpVm2
 				}
-			]
+			}
+		]
 	}
 }
 
@@ -62,71 +88,55 @@ resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 
 // The route table association is now handled inline in the VNet subnet definition.
 // Two VMs in different subnets
-param vm1Name string = 'training-vm1'
-param vm2Name string = 'training-vm2'
-param adminUsername string = 'azureuser'
-@secure()
-param adminPassword string
-@allowed([
-'Standard_B2pls_v2'
-'Standard_B2ps_v2'
-'Standard_B2pts_v2'
-'Standard_B4pls_v2'
-'Standard_B4ps_v2'
-])
-param vmSize string = 'Standard_B2ps_v2' // Make VM size selectable and default to a widely available size
-
-// Use Ubuntu Linux image for broad compatibility (supports Arm64 and x64)
-var imagePublisher = 'Canonical'
-var imageOffer = '0001-com-ubuntu-server-jammy'
-var imageSku = '22_04-lts-gen2'
-var imageVersion = 'latest'
-
-// VNET with three subnets: AzureFirewallSubnet, VM1Subnet, VM2Subnet
-param vnetName string = 'training-vnet'
-param firewallSubnetPrefix string = '10.0.0.0/24'
-param vm1SubnetPrefix string = '10.0.1.0/24'
+// ...existing code...
 
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
-  name: vnetName
-  location: location
-  tags: {
-	bicepRevision: string(bicepRevision)
-  }
-  properties: {
-	addressSpace: {
-	  addressPrefixes: [
-		'10.0.0.0/16'
-	  ]
+	name: vnetName
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
 	}
-	subnets: [
-	  {
-		name: 'AzureFirewallSubnet'
-		properties: {
-		  addressPrefix: firewallSubnetPrefix
+	properties: {
+		addressSpace: {
+			addressPrefixes: [
+				'10.0.0.0/16'
+			]
 		}
-	  }
-	  {
-		name: 'VM1Subnet'
-		properties: {
-		  addressPrefix: vm1SubnetPrefix
-		  routeTable: {
-			id: routeTableVm1.id
-		  }
-		}
-	  }
-	  {
-		name: 'VM2Subnet'
-		properties: {
-		  addressPrefix: vm2SubnetPrefix
-		  privateEndpointNetworkPolicies: 'Enabled'
-		  routeTable: {
-			id: routeTableVm2.id
-		  }
-		}
-	  }
-	]
-  }
+		subnets: [
+			{
+				name: 'AzureFirewallSubnet'
+				properties: {
+					addressPrefix: firewallSubnetPrefix
+				}
+			}
+			{
+				name: 'VM1Subnet'
+				properties: {
+					addressPrefix: vm1SubnetPrefix
+					routeTable: {
+						id: routeTableVm1.id
+					}
+				}
+			}
+			{
+				name: 'VM2Subnet'
+				properties: {
+					addressPrefix: vm2SubnetPrefix
+					privateEndpointNetworkPolicies: 'Enabled'
+					routeTable: {
+						id: routeTableVm2.id
+					}
+				}
+			}
+			{
+				name: 'PESubnet'
+				properties: {
+					addressPrefix: peSubnetPrefix
+					privateEndpointNetworkPolicies: 'Enabled'
+				}
+			}
+		]
+	}
 }
 
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
@@ -255,7 +265,7 @@ resource firewallPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
   }
 }
 
-param firewallName string = 'training-firewall'
+// ...existing code...
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	name: firewallName
@@ -281,10 +291,50 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 				}
 			}
 		]
+		firewallPolicy: {
+			id: firewallPolicy.id
+		}
 	}
 }
+
+resource firewallPolicy 'Microsoft.Network/firewallPolicies@2023-09-01' = {
+	name: '${firewallName}-policy'
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
+	properties: {}
+}
+
+// Define rule collection group as a child resource
+resource firewallPolicyRuleCollectionGroup 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2023-09-01' = {
+	name: 'DefaultRuleCollectionGroup'
+	parent: firewallPolicy
+	properties: {
+		ruleCollections: [
+			{
+				name: 'AllowAnyAny'
+				ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
+				priority: 100
+				action: {
+					type: 'Allow'
+				}
+				rules: [
+					{
+						name: 'AllowAnyAnyRule'
+						ruleType: 'NetworkRule'
+						sourceAddresses: ['*']
+						destinationAddresses: ['*']
+						destinationPorts: ['*']
+						ipProtocols: ['Any']
+					}
+				]
+			}
+		]
+	}
+}
+
 // Private DNS Zone for Storage Account private endpoint
-param dnsZoneName string = 'privatelink.file.${environment().suffixes.storage}'
 // For multi-cloud, use: '${environment().suffixes.storageEndpointSuffix}' if needed
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
 	name: dnsZoneName
@@ -303,23 +353,32 @@ resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@
 		}
 	properties: {
 		virtualNetwork: {
-			id: vnet.id
+ 			id: resourceId('Microsoft.Network/virtualNetworks', vnetName)
 		}
 		registrationEnabled: false
 	}
 }
 // Private Endpoint for File access to Storage Account in VM2Subnet
-param privateEndpointName string = 'training-pe'
+// ...existing code...
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 	name: privateEndpointName
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
 	properties: {
 		subnet: {
-			id: vnet.properties.subnets[2].id
+ 			id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, 'PESubnet')
 		}
+		customNetworkInterfaceName: '${privateEndpointName}-nic'
+		ipConfigurations: [
+			{
+				name: 'pe-ipconfig'
+				properties: {
+					privateIPAddress: peSubnetLastIp
+				}
+			}
+		]
 		privateLinkServiceConnections: [
 			{
 				name: 'storageAccountFileConnection'
@@ -332,7 +391,7 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
 	}
 }
 // Storage Account with File service enabled
-param storageAccountName string = 'trngstor${uniqueString(resourceGroup().id)}'
+// ...existing code...
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 	name: storageAccountName
 		location: location
@@ -353,6 +412,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 			defaultAction: 'Deny'
 		}
 		isHnsEnabled: false
-// (Duplicate VNET resource removed; keep only the first definition above)
+// ...existing code...
   }
 }
