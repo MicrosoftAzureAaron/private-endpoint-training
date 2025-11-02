@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.7'  
+var bicepRevision = '0.2.8'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -116,7 +116,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 				name: 'VM2Subnet'
 				properties: {
 					addressPrefix: vm2SubnetPrefix
-					privateEndpointNetworkPolicies: 'Enabled'
 					routeTable: {
 						id: routeTableVm2.id
 					}
