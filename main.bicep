@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.8'  
+var bicepRevision = '0.2.9'  
 
 // Parameters
 param location string = resourceGroup().location
