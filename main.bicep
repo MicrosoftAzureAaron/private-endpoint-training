@@ -73,7 +73,14 @@ param vm2Name string = 'training-vm2'
 param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
-param vmSize string = 'Standard_B2s' // Make VM size selectable
+@allowed([
+	'Standard_DS1_v2'
+	'Standard_B2ms'
+	'Standard_D2s_v3'
+	'Standard_D2_v2'
+	'Standard_F2s_v2'
+])
+param vmSize string = 'Standard_DS1_v2' // Make VM size selectable and default to a widely available size
 
 // Select image SKU based on VM size (Gen2 for v6 SKUs, Gen1 otherwise)
 var imageSku = contains(vmSize, 'v6') ? '2019-datacenter-g2' : '2019-Datacenter'
