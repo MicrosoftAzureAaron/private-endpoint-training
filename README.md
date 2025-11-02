@@ -47,7 +47,10 @@ This template deploys a secure Azure environment for private endpoint training, 
 ## Effective Routes
 
 
-![VM1 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm1effectiveroutes.png)  
+### VM1 Effective Routes
+![VM1 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm1effectiveroutes.png)
+
+### VM2 Effective Routes
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutes.png)
 
 ## Deploy to Azure
