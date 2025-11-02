@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "13112413913811614690"
+      "templateHash": "11114848780553079696"
     }
   },
   "parameters": {
@@ -93,7 +93,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.9",
+    "bicepRevision": "0.2.9b",
     "imagePublisher": "Canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
     "imageSku": "22_04-lts-arm64",
@@ -390,11 +390,11 @@
     {
       "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
       "apiVersion": "2023-09-01",
-      "name": "[format('{0}/{1}', format('{0}-policy', parameters('firewallName')), 'PETrainingRuleCollectionGroup')]",
+      "name": "[format('{0}/{1}', format('{0}-policy', parameters('firewallName')), 'PETrainingRCG')]",
       "properties": {
         "ruleCollections": [
           {
-            "name": "AllowAnyAny",
+            "name": "AllowAll",
             "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
             "priority": 100,
             "action": {
@@ -402,7 +402,7 @@
             },
             "rules": [
               {
-                "name": "AllowAnyAnyRule",
+                "name": "AllowAllRule",
                 "ruleType": "NetworkRule",
                 "sourceAddresses": [
                   "*"
