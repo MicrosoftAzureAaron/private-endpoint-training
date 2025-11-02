@@ -42,8 +42,7 @@ This template deploys a secure Azure environment for private endpoint training, 
   - **Note:** VM1's route table does not impact traffic destined for the private endpoint. Azure automatically handles private endpoint traffic, bypassing user-defined routes in the subnet. This means VM1 cannot route private endpoint traffic through the firewall unless private endpoint policies are enabled on the subnet.
 - **VM2Subnet Route Table**
   - Route: Private endpoint traffic → Next hop: Azure Firewall
-  - Private endpoint policies: Enabled
-  - **Note:** With private endpoint policies enabled, VM2's subnet can enforce custom routing for private endpoint traffic, allowing inspection and control through the Azure Firewall. This is a key difference from VM1's subnet, which does not have private endpoint policies enabled and cannot control private endpoint traffic via its route table.
+  - **Note:** With private endpoint policies enabled on the PE subnet, VM2's subnet can enforce custom routing for private endpoint traffic, allowing inspection and control through the Azure Firewall. This is a key difference from VM1's subnet, which does not have a route table that fits the private endpoint override and cannot control private endpoint traffic via its route table.
 
 ## Deploy to Azure
 To deploy this template in your Azure subscription:
