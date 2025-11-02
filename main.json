@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "15936926863026412681"
+      "templateHash": "6790437712930653691"
     }
   },
   "parameters": {
@@ -93,7 +93,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.3",
+    "bicepRevision": "0.2.4",
     "imagePublisher": "Canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
     "imageSku": "22_04-lts-gen2",
@@ -434,6 +434,22 @@
       "tags": {
         "bicepRevision": "[string(variables('bicepRevision'))]"
       }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "apiVersion": "2024-06-01",
+      "name": "[format('{0}/{1}', parameters('dnsZoneName'), format('{0}.{1}', parameters('storageAccountName'), parameters('dnsZoneName')))]",
+      "properties": {
+        "aRecords": [
+          {
+            "ipv4Address": "[variables('peSubnetLastIp')]"
+          }
+        ],
+        "ttl": 3600
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', parameters('dnsZoneName'))]"
+      ]
     },
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",

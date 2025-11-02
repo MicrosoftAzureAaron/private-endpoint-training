@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.2.3'  // Increment this value each time the Bicep file is updated
+var bicepRevision = '0.2.4'  
 
 // Parameters
 param location string = resourceGroup().location
@@ -333,6 +333,20 @@ resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
 		tags: {
 			bicepRevision: string(bicepRevision)
 		}
+}
+
+// Private DNS A record for the storage account's private endpoint
+resource privateDnsARecord 'Microsoft.Network/privateDnsZones/A@2024-06-01' = {
+	name: '${storageAccountName}.${dnsZoneName}'
+	parent: privateDnsZone
+	properties: {
+		aRecords: [
+			{
+				ipv4Address: peSubnetLastIp
+			}
+		]
+		ttl: 3600
+	}
 }
 
 resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
