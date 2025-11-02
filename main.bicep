@@ -1,15 +1,21 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.1.8'  // Increment this value each time the Bicep file is updated
+var bicepRevision = '0.2.0'  // Increment this value each time the Bicep file is updated
 // Route tables for subnets
 param routeTableVm1Name string = 'rt-vm1'
 param routeTableVm2Name string = 'rt-vm2'
+
+// Location parameter required for resources
+param location string = resourceGroup().location
+
+// Subnet address prefixes
+param vm2SubnetPrefix string = '10.0.3.0/24' // Update this value to match your network design
 
 // Get the private IP address of the Azure Firewall (use a parameter to break the cycle)
 param firewallPrivateIpVm1 string = '10.0.1.4'
 
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
-		location: location
+	location: location
 		tags: {
 			bicepRevision: string(bicepRevision)
 		}
@@ -33,7 +39,7 @@ param firewallPrivateIpVm2 string = '10.0.1.4'
 
 resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm2Name
-		location: location
+	location: location
 		tags: {
 			bicepRevision: string(bicepRevision)
 		}
@@ -70,14 +76,65 @@ param adminPassword string
 ])
 param vmSize string = 'Standard_B2ps_v2' // Make VM size selectable and default to a widely available size
 
-var imageSku = contains(vmSize, 'v6') ? '2019-datacenter-g2' : '2019-Datacenter'
+// Use Ubuntu Linux image for broad compatibility (supports Arm64 and x64)
+var imagePublisher = 'Canonical'
+var imageOffer = '0001-com-ubuntu-server-jammy'
+var imageSku = '22_04-lts-gen2'
+var imageVersion = 'latest'
+
+// VNET with three subnets: AzureFirewallSubnet, VM1Subnet, VM2Subnet
+param vnetName string = 'training-vnet'
+param firewallSubnetPrefix string = '10.0.0.0/24'
+param vm1SubnetPrefix string = '10.0.1.0/24'
+
+resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
+  name: vnetName
+  location: location
+  tags: {
+	bicepRevision: string(bicepRevision)
+  }
+  properties: {
+	addressSpace: {
+	  addressPrefixes: [
+		'10.0.0.0/16'
+	  ]
+	}
+	subnets: [
+	  {
+		name: 'AzureFirewallSubnet'
+		properties: {
+		  addressPrefix: firewallSubnetPrefix
+		}
+	  }
+	  {
+		name: 'VM1Subnet'
+		properties: {
+		  addressPrefix: vm1SubnetPrefix
+		  routeTable: {
+			id: routeTableVm1.id
+		  }
+		}
+	  }
+	  {
+		name: 'VM2Subnet'
+		properties: {
+		  addressPrefix: vm2SubnetPrefix
+		  privateEndpointNetworkPolicies: 'Enabled'
+		  routeTable: {
+			id: routeTableVm2.id
+		  }
+		}
+	  }
+	]
+  }
+}
 
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 	name: '${vm1Name}-nic'
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
 	properties: {
 		ipConfigurations: [
 			{
@@ -94,10 +151,10 @@ resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 
 resource vm2Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 	name: '${vm2Name}-nic'
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
 	properties: {
 		ipConfigurations: [
 			{
@@ -113,98 +170,99 @@ resource vm2Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 }
 
 resource vm1 'Microsoft.Compute/virtualMachines@2023-09-01' = {
-	name: vm1Name
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
-	properties: {
-			hardwareProfile: {
-				vmSize: vmSize
-			}
-		osProfile: {
-			computerName: vm1Name
-			adminUsername: adminUsername
-			adminPassword: adminPassword
-		}
-		storageProfile: {
-							imageReference: {
-								publisher: 'MicrosoftWindowsServer'
-								offer: 'WindowsServer'
-								sku: imageSku
-								version: 'latest'
-							}
-			osDisk: {
-				createOption: 'FromImage'
-			}
-		}
-		networkProfile: {
-			networkInterfaces: [
-				{
-					id: vm1Nic.id
-				}
-			]
-		}
+  name: vm1Name
+  location: location
+  tags: {
+	bicepRevision: string(bicepRevision)
+  }
+  properties: {
+	hardwareProfile: {
+	  vmSize: vmSize
 	}
+	osProfile: {
+	  computerName: vm1Name
+	  adminUsername: adminUsername
+	  adminPassword: adminPassword
+	}
+	storageProfile: {
+	  imageReference: {
+		publisher: imagePublisher
+		offer: imageOffer
+		sku: imageSku
+		version: imageVersion
+	  }
+	  osDisk: {
+		createOption: 'FromImage'
+	  }
+	}
+	networkProfile: {
+	  networkInterfaces: [
+		{
+		  id: vm1Nic.id
+		}
+	  ]
+	}
+  }
 }
 
 resource vm2 'Microsoft.Compute/virtualMachines@2023-09-01' = {
-	name: vm2Name
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
-	properties: {
-			hardwareProfile: {
-				vmSize: vmSize
-			}
-		osProfile: {
-			computerName: vm2Name
-			adminUsername: adminUsername
-			adminPassword: adminPassword
-		}
-		storageProfile: {
-							imageReference: {
-								publisher: 'MicrosoftWindowsServer'
-								offer: 'WindowsServer'
-								sku: imageSku
-								version: 'latest'
-							}
-			osDisk: {
-				createOption: 'FromImage'
-			}
-		}
-		networkProfile: {
-			networkInterfaces: [
-				{
-					id: vm2Nic.id
-				}
-			]
-		}
+  name: vm2Name
+  location: location
+  tags: {
+	bicepRevision: string(bicepRevision)
+  }
+  properties: {
+	hardwareProfile: {
+	  vmSize: vmSize
 	}
+	osProfile: {
+	  computerName: vm2Name
+	  adminUsername: adminUsername
+	  adminPassword: adminPassword
+	}
+	storageProfile: {
+	  imageReference: {
+		publisher: imagePublisher
+		offer: imageOffer
+		sku: imageSku
+		version: imageVersion
+	  }
+	  osDisk: {
+		createOption: 'FromImage'
+	  }
+	}
+	networkProfile: {
+	  networkInterfaces: [
+		{
+		  id: vm2Nic.id
+		}
+	  ]
+	}
+  }
 }
-// Azure Firewall in dedicated subnet
-param firewallName string = 'training-firewall'
+
 resource firewallPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
-	name: '${firewallName}-pip'
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
-	sku: {
-		name: 'Standard'
-	}
-	properties: {
-		publicIPAllocationMethod: 'Static'
-	}
+  name: 'firewall-pip'
+  location: location
+  tags: {
+	bicepRevision: string(bicepRevision)
+  }
+  sku: {
+	name: 'Standard'
+  }
+  properties: {
+	publicIPAllocationMethod: 'Static'
+  }
 }
+
+param firewallName string = 'training-firewall'
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	name: firewallName
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
 	properties: {
 		sku: {
 			name: 'AZFW_VNet'
@@ -295,50 +353,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 			defaultAction: 'Deny'
 		}
 		isHnsEnabled: false
-		largeFileSharesState: 'Enabled'
-	}
-}
-// VNET with three subnets: AzureFirewallSubnet, VM1Subnet, VM2Subnet
-param location string = resourceGroup().location
-param vnetName string = 'training-vnet'
-param vnetAddressPrefix string = '10.0.0.0/16'
-param firewallSubnetPrefix string = '10.0.1.0/24'
-param vm1SubnetPrefix string = '10.0.2.0/24'
-param vm2SubnetPrefix string = '10.0.3.0/24'
-
-resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
-	name: vnetName
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
-	properties: {
-		addressSpace: {
-			addressPrefixes: [vnetAddressPrefix]
-		}
-		subnets: [
-			{
-				name: 'AzureFirewallSubnet'
-				properties: {
-					addressPrefix: firewallSubnetPrefix
-				}
-			}
-			{
-				name: 'VM1Subnet'
-				properties: {
-					addressPrefix: vm1SubnetPrefix
-					routeTable: {
-						id: routeTableVm1.id
-					}
-				}
-			}
-			{
-				name: 'VM2Subnet'
-				properties: {
-					addressPrefix: vm2SubnetPrefix
-					privateEndpointNetworkPolicies: 'Enabled'
-				}
-			}
-		]
-	}
+// (Duplicate VNET resource removed; keep only the first definition above)
+  }
 }
