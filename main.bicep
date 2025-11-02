@@ -264,6 +264,9 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
 	tags: {
 		bicepRevision: string(bicepRevision)
 	}
+	dependsOn: [
+		firewallPolicy
+	]
 	properties: {
 		sku: {
 			name: 'AZFW_VNet'
