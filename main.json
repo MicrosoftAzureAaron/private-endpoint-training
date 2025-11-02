@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "109037045078051950"
+      "templateHash": "5145259356417798974"
     }
   },
   "parameters": {
@@ -33,7 +33,16 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.2.18",
+    "vm3SubnetPrefix": "10.0.4.0/24",
+    "vm4SubnetPrefix": "10.0.5.0/24",
+    "vm5SubnetPrefix": "10.0.6.0/24",
+    "routeTableVm3Name": "rt-vm3",
+    "routeTableVm4Name": "rt-vm4",
+    "routeTableVm5Name": "rt-vm5",
+    "vm3Name": "training-vm3",
+    "vm4Name": "training-vm4",
+    "vm5Name": "training-vm5",
+    "bicepRevision": "0.3.1",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "firewallSubnetPrefix": "10.0.0.0/24",
@@ -50,6 +59,9 @@
     "dnsZoneName": "[format('privatelink.file.{0}', environment().suffixes.storage)]",
     "privateEndpointName": "training-pe",
     "storageAccountName": "[format('trngstor{0}', uniqueString(resourceGroup().id))]",
+    "vm3SubnetName": "VM3Subnet",
+    "vm4SubnetName": "VM4Subnet",
+    "vm5SubnetName": "VM5Subnet",
     "imagePublisher": "Canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
     "imageSku": "22_04-lts-arm64",
@@ -57,6 +69,63 @@
     "peSubnetLastIp": "10.0.3.254"
   },
   "resources": [
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm3Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "default-to-firewall",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm4Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "storage-to-firewall",
+            "properties": {
+              "addressPrefix": "Storage",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm5Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": []
+      }
+    },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2023-09-01",
@@ -147,6 +216,54 @@
             }
           },
           {
+            "name": "[variables('vm3SubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('vm3SubnetPrefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm3Name'))]"
+              },
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.Storage"
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          },
+          {
+            "name": "[variables('vm4SubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('vm4SubnetPrefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm4Name'))]"
+              },
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.Storage"
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          },
+          {
+            "name": "[variables('vm5SubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('vm5SubnetPrefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm5Name'))]"
+              },
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.Storage"
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Disabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          },
+          {
             "name": "PESubnet",
             "properties": {
               "addressPrefix": "[variables('peSubnetPrefix')]",
@@ -158,7 +275,193 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm1Name'))]",
-        "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm2Name'))]"
+        "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm2Name'))]",
+        "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm3Name'))]",
+        "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm4Name'))]",
+        "[resourceId('Microsoft.Network/routeTables', variables('routeTableVm5Name'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}-nic', variables('vm3Name'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm3SubnetName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}-nic', variables('vm4Name'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm4SubnetName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}-nic', variables('vm5Name'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm5SubnetName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('vm3Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vm3Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm3Name')))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm3Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('vm4Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vm4Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm4Name')))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm4Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('vm5Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vm5Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm5Name')))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm5Name')))]"
       ]
     },
     {
@@ -441,7 +744,18 @@
         "supportsHttpsTrafficOnly": true,
         "networkAcls": {
           "bypass": "AzureServices",
-          "defaultAction": "Deny"
+          "defaultAction": "Deny",
+          "virtualNetworkRules": [
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm3SubnetName'))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm4SubnetName'))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm5SubnetName'))]"
+            }
+          ]
         },
         "isHnsEnabled": false
       }
