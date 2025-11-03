@@ -68,13 +68,13 @@ This template deploys a secure Azure environment for private endpoint training, 
 
 ## Service Endpoint Effective Routes
 
-### VM3 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+### VM3 Effective Routes, Route Table with 0.0.0.0/0 to Firewall does not impacte Service Endpoint routes
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm3effectiveroutes.png)
 
-### VM4 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+### VM4 Effective Routes, Route Table with Service Tag for Storage Impacts some Routes
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm4effectiveroutes.png)
 
-### VM5 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+### VM5 Effective Routes, Route Table no routes does not impact Service Endpoint Routes
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm5effectiveroutes.png)
 
 
