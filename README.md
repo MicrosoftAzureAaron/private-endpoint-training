@@ -64,7 +64,7 @@ This template deploys a secure Azure environment for private endpoint training, 
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutesVNETRoute.png)
 
 ### VM2 Effective Routes, Route Table with IP prefix Route > VNET IP Prefix
-![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutesLargeRoute.png)
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutes2LargeRoute.png)
 
 ## Service Endpoint Effective Routes
 
