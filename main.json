@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "4625318329369335398"
+      "templateHash": "13823835454487707743"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.3.3",
+    "bicepRevision": "0.3.4",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "azureFirewallSubnetName": "AzureFirewallSubnet",
@@ -42,20 +42,20 @@
     "vm1SubnetPrefix": "10.0.1.0/24",
     "vm2SubnetName": "VM2Subnet",
     "vm2SubnetPrefix": "10.0.2.0/24",
-    "peSubnetName": "PESubnet",
-    "peSubnetPrefix": "10.0.3.0/24",
     "vm3SubnetName": "VM3Subnet",
-    "vm3SubnetPrefix": "10.0.4.0/24",
+    "vm3SubnetPrefix": "10.0.3.0/24",
     "vm4SubnetName": "VM4Subnet",
-    "vm4SubnetPrefix": "10.0.5.0/24",
+    "vm4SubnetPrefix": "10.0.4.0/24",
     "vm5SubnetName": "VM5Subnet",
-    "vm5SubnetPrefix": "10.0.6.0/24",
+    "vm5SubnetPrefix": "10.0.5.0/24",
+    "peSubnetName": "PESubnet",
+    "peSubnetPrefix": "10.0.255.0/24",
     "routeTableVm1Name": "rt-vm1",
     "routeTableVm2Name": "rt-vm2",
     "routeTableVm3Name": "rt-vm3",
     "routeTableVm4Name": "rt-vm4",
     "routeTableVm5Name": "rt-vm5",
-    "peSubnetLastIp": "10.0.3.254",
+    "peSubnetLastIp": "10.0.255.254",
     "vm1Name": "training-vm1",
     "vm2Name": "training-vm2",
     "vm3Name": "training-vm3",
@@ -115,6 +115,63 @@
             }
           }
         ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm3Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "default-to-firewall",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm4Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "storage-to-firewall",
+            "properties": {
+              "addressPrefix": "Storage",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm5Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": []
       }
     },
     {
@@ -290,7 +347,7 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[4].id]"
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[3].id]"
               }
             }
           }
@@ -314,7 +371,7 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[5].id]"
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[4].id]"
               }
             }
           }
@@ -338,7 +395,7 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[6].id]"
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[5].id]"
               }
             }
           }
@@ -714,63 +771,6 @@
           ]
         },
         "isHnsEnabled": false
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('routeTableVm3Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": [
-          {
-            "name": "default-to-firewall",
-            "properties": {
-              "addressPrefix": "0.0.0.0/0",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('routeTableVm4Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": [
-          {
-            "name": "storage-to-firewall",
-            "properties": {
-              "addressPrefix": "Storage",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('routeTableVm5Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": []
       }
     },
     {
