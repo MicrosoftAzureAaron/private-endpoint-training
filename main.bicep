@@ -673,6 +673,9 @@ resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@
     }
     registrationEnabled: false
   }
+  dependsOn: [
+    vnet
+  ]
 }
 
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {

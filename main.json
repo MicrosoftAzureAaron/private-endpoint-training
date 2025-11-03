@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "16761700558195119186"
+      "templateHash": "7420088303636367488"
     }
   },
   "parameters": {
@@ -734,7 +734,8 @@
         "registrationEnabled": false
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/privateDnsZones', variables('dnsZoneName'))]"
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('dnsZoneName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
       ]
     },
     {
