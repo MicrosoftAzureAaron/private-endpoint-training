@@ -1,6 +1,3 @@
-## Expected VM IPs
-- VM1: `10.0.1.4` (first available in VM1Subnet)
-- VM2: `10.0.2.4` (first available in VM2Subnet)
 # Private Endpoint Training Deployment
 
 This template deploys a secure Azure environment for private endpoint training, including:
