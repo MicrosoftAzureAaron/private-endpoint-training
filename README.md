@@ -101,7 +101,7 @@ To apply the storage endpoint and ACL fix, use the button below:
 > **Note:** What Client IP address will be seen by the Azure Stoage Account?
 
 ## Template Overview
-This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control.
+This template is designed for secure, segmented access to Azure Storage via private endpoints, with some traffic routed through Azure Firewall for inspection and control.
 
 ### Route Tables & Private Endpoint Policies Impact
 
