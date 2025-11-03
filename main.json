@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "7420088303636367488"
+      "templateHash": "2080961069900617354"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.3.5",
+    "bicepRevision": "0.3.6",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "azureFirewallSubnetName": "AzureFirewallSubnet",
