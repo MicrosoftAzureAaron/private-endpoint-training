@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "13823835454487707743"
+      "templateHash": "11716999450961582001"
     }
   },
   "parameters": {
@@ -73,6 +73,41 @@
     "privateEndpointName": "training-pe"
   },
   "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot",
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true,
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Deny",
+          "virtualNetworkRules": [
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm3SubnetName'))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm4SubnetName'))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm5SubnetName'))]"
+            }
+          ]
+        },
+        "isHnsEnabled": false
+      }
+    },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2023-09-01",
@@ -737,41 +772,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
       ]
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2023-01-01",
-      "name": "[variables('storageAccountName')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "sku": {
-        "name": "Standard_LRS"
-      },
-      "kind": "StorageV2",
-      "properties": {
-        "accessTier": "Hot",
-        "allowBlobPublicAccess": false,
-        "minimumTlsVersion": "TLS1_2",
-        "supportsHttpsTrafficOnly": true,
-        "networkAcls": {
-          "bypass": "AzureServices",
-          "defaultAction": "Deny",
-          "virtualNetworkRules": [
-            {
-              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm3SubnetName'))]"
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm4SubnetName'))]"
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm5SubnetName'))]"
-            }
-          ]
-        },
-        "isHnsEnabled": false
-      }
     },
     {
       "type": "Microsoft.Resources/deployments",

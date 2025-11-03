@@ -66,6 +66,42 @@ var dnsZoneName = 'privatelink.file.${environment().suffixes.storage}'
 var privateEndpointName = 'training-pe'
 
 // Resources
+
+// Storage Account with File service enabled
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: storageAccountName
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+    allowBlobPublicAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      virtualNetworkRules: [
+        {
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
+        }
+        {
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
+        }
+        {
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
+        }
+      ]
+    }
+    isHnsEnabled: false
+  }
+}
+
 // Route Tables for VMs
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
   name: routeTableVm1Name
@@ -668,41 +704,3 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
     ]
   }
 }
-
-// Storage Account with File service enabled
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: storageAccountName
-  location: location
-  tags: {
-    bicepRevision: string(bicepRevision)
-  }
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    accessTier: 'Hot'
-    allowBlobPublicAccess: false
-    minimumTlsVersion: 'TLS1_2'
-    supportsHttpsTrafficOnly: true
-    networkAcls: {
-      bypass: 'AzureServices'
-      defaultAction: 'Deny'
-      virtualNetworkRules: [
-        {
-          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
-        }
-        {
-          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
-        }
-        {
-          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
-        }
-      ]
-    }
-    isHnsEnabled: false
-  }
-}
-
-
-
