@@ -94,7 +94,7 @@ To apply the storage endpoint and ACL fix, use the button below:
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Ffix.json)
 
-> **Note:** This will deploy the `fix.json` template from the main branch to update storage service endpoints and ACLs as described above.
+> **Note:** This will deploy the `fix.json` template from the main branch to update storage service endpoints and ACLs as described above. This removes service endpoint from all of the VM subnets and applies to the Azure Firewall subnet only. Can you predict which VM subnet will be able to access the storage account via the Azure Firewall?
 
 ## Template Overview
 This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control.
