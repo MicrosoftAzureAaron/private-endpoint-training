@@ -5,13 +5,13 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "14361212084224464587"
+      "templateHash": "9309744004058700244"
     }
   },
   "parameters": {
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "trngstormy235qto7d4rg"
+      "defaultValue": "trngstor3kx5kjdzuqzq6"
     }
   },
   "variables": {
@@ -31,6 +31,33 @@
             "service": "Microsoft.Storage"
           }
         ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}/{1}', variables('vnetName'), 'VM3Subnet')]",
+      "properties": {
+        "addressPrefix": "10.0.4.0/24",
+        "serviceEndpoints": []
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}/{1}', variables('vnetName'), 'VM4Subnet')]",
+      "properties": {
+        "addressPrefix": "10.0.5.0/24",
+        "serviceEndpoints": []
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}/{1}', variables('vnetName'), 'VM5Subnet')]",
+      "properties": {
+        "addressPrefix": "10.0.6.0/24",
+        "serviceEndpoints": []
       }
     },
     {
