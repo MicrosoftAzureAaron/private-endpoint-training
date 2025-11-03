@@ -38,7 +38,7 @@ This template deploys a secure Azure environment for private endpoint training, 
 - PESubnet: `10.0.255.0/24`
 
 ## Private Endpoint IP
-- Private Endpoint IP: `10.0.3.254` (last IP in PESubnet)
+- Private Endpoint IP: `10.0.255.254` (last IP in PESubnet)
 
 
 ## Route Table Details
