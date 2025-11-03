@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.3.4' //added as tag on each resource to track deployment version
+var bicepRevision = '0.3.5' //added as tag on each resource to track deployment version
 
 // Parameters
 param location string = resourceGroup().location
@@ -100,6 +100,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
     isHnsEnabled: false
   }
+  dependsOn: [
+    vnet
+  ]
 }
 
 // Route Tables for VMs
@@ -704,3 +707,4 @@ resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
     ]
   }
 }
+
