@@ -262,7 +262,7 @@ resource vm3Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
+            id: vnet.properties.subnets[4].id
           }
         }
       }
@@ -282,7 +282,7 @@ resource vm4Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
+            id: vnet.properties.subnets[5].id
           }
         }
       }
@@ -302,7 +302,7 @@ resource vm5Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
+            id: vnet.properties.subnets[6].id
           }
         }
       }

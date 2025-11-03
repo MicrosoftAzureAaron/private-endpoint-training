@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "11698442228352545838"
+      "templateHash": "4625318329369335398"
     }
   },
   "parameters": {
@@ -290,12 +290,15 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm3SubnetName'))]"
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[4].id]"
               }
             }
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -311,12 +314,15 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm4SubnetName'))]"
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[5].id]"
               }
             }
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -332,12 +338,15 @@
             "name": "ipconfig1",
             "properties": {
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('vm5SubnetName'))]"
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[6].id]"
               }
             }
           }
         ]
-      }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
