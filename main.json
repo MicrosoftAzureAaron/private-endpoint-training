@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "5145259356417798974"
+      "templateHash": "14880039577793914709"
     }
   },
   "parameters": {
@@ -33,99 +33,46 @@
     }
   },
   "variables": {
+    "bicepRevision": "0.3.2",
+    "vnetName": "training-vnet",
+    "vnetAddressPrefix": "10.0.0.0/16",
+    "azureFirewallSubnetName": "AzureFirewallSubnet",
+    "firewallSubnetPrefix": "10.0.0.0/24",
+    "vm1SubnetName": "VM1Subnet",
+    "vm1SubnetPrefix": "10.0.1.0/24",
+    "vm2SubnetName": "VM2Subnet",
+    "vm2SubnetPrefix": "10.0.2.0/24",
+    "peSubnetName": "PESubnet",
+    "peSubnetPrefix": "10.0.3.0/24",
+    "vm3SubnetName": "VM3Subnet",
     "vm3SubnetPrefix": "10.0.4.0/24",
+    "vm4SubnetName": "VM4Subnet",
     "vm4SubnetPrefix": "10.0.5.0/24",
+    "vm5SubnetName": "VM5Subnet",
     "vm5SubnetPrefix": "10.0.6.0/24",
+    "routeTableVm1Name": "rt-vm1",
+    "routeTableVm2Name": "rt-vm2",
     "routeTableVm3Name": "rt-vm3",
     "routeTableVm4Name": "rt-vm4",
     "routeTableVm5Name": "rt-vm5",
+    "peSubnetLastIp": "10.0.3.254",
+    "vm1Name": "training-vm1",
+    "vm2Name": "training-vm2",
     "vm3Name": "training-vm3",
     "vm4Name": "training-vm4",
     "vm5Name": "training-vm5",
-    "bicepRevision": "0.3.1",
-    "vnetName": "training-vnet",
-    "vnetAddressPrefix": "10.0.0.0/16",
-    "firewallSubnetPrefix": "10.0.0.0/24",
-    "vm1SubnetPrefix": "10.0.1.0/24",
-    "vm2SubnetPrefix": "10.0.2.0/24",
-    "peSubnetPrefix": "10.0.3.0/24",
-    "routeTableVm1Name": "rt-vm1",
-    "routeTableVm2Name": "rt-vm2",
-    "vm1Name": "training-vm1",
-    "vm2Name": "training-vm2",
-    "firewallName": "training-firewall",
-    "firewallPolicyName": "training-firewall-policy",
-    "firewallPrivateIp": "10.0.0.4",
-    "dnsZoneName": "[format('privatelink.file.{0}', environment().suffixes.storage)]",
-    "privateEndpointName": "training-pe",
-    "storageAccountName": "[format('trngstor{0}', uniqueString(resourceGroup().id))]",
-    "vm3SubnetName": "VM3Subnet",
-    "vm4SubnetName": "VM4Subnet",
-    "vm5SubnetName": "VM5Subnet",
     "imagePublisher": "Canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
     "imageSku": "22_04-lts-arm64",
     "imageVersion": "latest",
-    "peSubnetLastIp": "10.0.3.254"
+    "firewallName": "training-firewall",
+    "firewallPolicyName": "training-firewall-policy",
+    "firewallPrivateIp": "10.0.0.4",
+    "storageAccountName": "[format('trngstor{0}', uniqueString(resourceGroup().id))]",
+    "dnsZoneName": "[format('privatelink.file.{0}', environment().suffixes.storage)]",
+    "privateEndpointName": "training-pe"
   },
   "resources": [
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('routeTableVm3Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": [
-          {
-            "name": "default-to-firewall",
-            "properties": {
-              "addressPrefix": "0.0.0.0/0",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('routeTableVm4Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": [
-          {
-            "name": "storage-to-firewall",
-            "properties": {
-              "addressPrefix": "Storage",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('routeTableVm5Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "disableBgpRoutePropagation": false,
-        "routes": []
-      }
-    },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2023-09-01",
@@ -186,7 +133,7 @@
         },
         "subnets": [
           {
-            "name": "AzureFirewallSubnet",
+            "name": "[variables('azureFirewallSubnetName')]",
             "properties": {
               "addressPrefix": "[variables('firewallSubnetPrefix')]",
               "privateEndpointNetworkPolicies": "Disabled",
@@ -194,7 +141,7 @@
             }
           },
           {
-            "name": "VM1Subnet",
+            "name": "[variables('vm1SubnetName')]",
             "properties": {
               "addressPrefix": "[variables('vm1SubnetPrefix')]",
               "routeTable": {
@@ -205,7 +152,7 @@
             }
           },
           {
-            "name": "VM2Subnet",
+            "name": "[variables('vm2SubnetName')]",
             "properties": {
               "addressPrefix": "[variables('vm2SubnetPrefix')]",
               "routeTable": {
@@ -264,7 +211,7 @@
             }
           },
           {
-            "name": "PESubnet",
+            "name": "[variables('peSubnetName')]",
             "properties": {
               "addressPrefix": "[variables('peSubnetPrefix')]",
               "privateEndpointNetworkPolicies": "RouteTableEnabled",
@@ -758,6 +705,63 @@
           ]
         },
         "isHnsEnabled": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm3Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "default-to-firewall",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm4Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "storage-to-firewall",
+            "properties": {
+              "addressPrefix": "Storage",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('firewallPrivateIp')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('routeTableVm5Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": []
       }
     },
     {

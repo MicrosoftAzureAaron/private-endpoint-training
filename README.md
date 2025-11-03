@@ -8,15 +8,16 @@ This template deploys a secure Azure environment for private endpoint training, 
 - **Virtual Network (VNET)**: Address space `10.0.0.0/16` with four subnets:
   - `AzureFirewallSubnet`: `10.0.0.0/24` (for Azure Firewall)
   - `VM1Subnet`: `10.0.1.0/24` (for VM1)
-  - `VM2Subnet`: `10.0.2.0/24` (for VM2, with private endpoint policies enabled)
-  - `PESubnet`: `10.0.3.0/24` (for Private Endpoint)
+  - `VM2Subnet`: `10.0.2.0/24` (for VM2)
+  - `PESubnet`: `10.0.3.0/24` (for Private Endpoint, with private endpoint policies enabled)
+  - `VM4Subnet`: `10.0.4.0/24` (for VM3)
+  - `VM4Subnet`: `10.0.5.0/24` (for VM4)
+  - `VM5Subnet`: `10.0.6.0/24` (for VM5)
 - **Storage Account**: With File service enabled, secured by a private endpoint.
 - **Private Endpoint**: For File access to the Storage Account, deployed in `PESubnet` (IP: `10.0.3.254`).
 - **Private DNS Zone**: For the Storage Account's private endpoint, linked to the VNET.
 - **Azure Firewall**: Deployed in `AzureFirewallSubnet`.
-- **Two Virtual Machines**:
-  - VM1 in `VM1Subnet`
-  - VM2 in `VM2Subnet`
+- **Five Virtual Machines**: 1 per VM Subnet
 - **Route Tables**:
   - VM1Subnet: Default route (`0.0.0.0/0`) to Azure Firewall
   - VM2Subnet: Route for private endpoint traffic to Azure Firewall
@@ -25,6 +26,9 @@ This template deploys a secure Azure environment for private endpoint training, 
     - The address prefix for the overriding route must be <= /16
       - Less than or equal to the VNET IP prefix
   - Private Endpoint subnet: Private endpoint policies for route tables enabled only on PE subnet
+  - VM3Subnet: Default route (`0.0.0.0/0`) to Azure Firewall does not impact Service Endpoint Traffic
+  - VM4Subnet: Storage Service Tag route **does** Impact Traffic to Storage Endpoint
+  - VM5Subnet: No routes does not impact Service Endpoint Traffic
 
 ## IP Ranges
 - VNET: `10.0.0.0/16`
@@ -32,6 +36,9 @@ This template deploys a secure Azure environment for private endpoint training, 
 - VM1Subnet: `10.0.1.0/24`
 - VM2Subnet: `10.0.2.0/24`
 - PESubnet: `10.0.3.0/24`
+- VM3Subnet: `10.0.4.0/24`
+- VM4Subnet: `10.0.5.0/24`
+- VM5Subnet: `10.0.6.0/24`
 
 ## Private Endpoint IP
 - Private Endpoint IP: `10.0.3.254` (last IP in PESubnet)
@@ -47,7 +54,7 @@ This template deploys a secure Azure environment for private endpoint training, 
   - Route: Private endpoint traffic → Next hop: Azure Firewall
   - **Note:** With private endpoint policies enabled on the PE subnet, VM2's subnet can enforce custom routing for private endpoint traffic, allowing inspection and control through the Azure Firewall. This is a key difference from VM1's subnet, which does not have a route table that fits the private endpoint override and cannot control private endpoint traffic via its route table.
 
-## Effective Routes
+## Private Endpoint Effective Routes
 - **Note:** Notice the Active/Invalid state of each of the routes in the below pictures.
 
 ### VM1 Effective Routes
@@ -59,14 +66,23 @@ This template deploys a secure Azure environment for private endpoint training, 
 ### VM2 Effective Routes, Route Table with VNET IP prefix Route
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutesVNETRoute.png)
 
-### VM2 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
-![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm2effectiveroutes2LargeRoute.png)
+## Service Endpoint Effective Routes
+
+### VM3 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm3effectiveroutes.png)
+
+### VM4 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm4effectiveroutes.png)
+
+### VM5 Effective Routes, Route Table with incorrect or not specific enough IP prefix Route, > VNET Prefix
+![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm5effectiveroutes.png)
+
 
 ## Deploy to Azure
 
 To deploy this template in your Azure subscription, use the button below:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.3.1)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.3.2)
 
 > **Tip:** You can right-click the Deploy to Azure button and select "Open link in new tab," or hold **Ctrl** (Windows) / **Cmd** (Mac) and click the button to open the deployment portal in a new tab.
 
@@ -87,6 +103,7 @@ This template is designed for secure, segmented access to Azure Storage via priv
 VNET (or a more specific prefix) in the VM subnet's route table, pointing to the Azure Firewall as the next hop. If this override route is missing, private endpoint traffic will not be inspected by the firewall.
 
 For questions or improvements, please open an issue or contact the author.
+
 
 
 

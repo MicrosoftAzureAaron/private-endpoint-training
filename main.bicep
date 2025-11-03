@@ -1,80 +1,8 @@
-var vm3SubnetPrefix = '10.0.4.0/24'
-var vm4SubnetPrefix = '10.0.5.0/24'
-var vm5SubnetPrefix = '10.0.6.0/24'
-var routeTableVm3Name = 'rt-vm3'
-var routeTableVm4Name = 'rt-vm4'
-var routeTableVm5Name = 'rt-vm5'
-var vm3Name = 'training-vm3'
-var vm4Name = 'training-vm4'
-var vm5Name = 'training-vm5'
-resource routeTableVm3 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm3Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'default-to-firewall'
-				properties: {
-					addressPrefix: '0.0.0.0/0'
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIp
-				}
-			}
-		]
-	}
-}
-
-resource routeTableVm4 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm4Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'storage-to-firewall'
-				properties: {
-					addressPrefix: 'Storage'
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIp
-				}
-			}
-		]
-	}
-}
-
-resource routeTableVm5 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm5Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: []
-	}
-}
 // Revision number for tracking deployments
-var bicepRevision = '0.3.1'  
+var bicepRevision = '0.3.2' //added as tag on each resource to track deployment version
 
 // Parameters
 param location string = resourceGroup().location
-var vnetName = 'training-vnet'
-var vnetAddressPrefix = '10.0.0.0/16'
-var firewallSubnetPrefix = '10.0.0.0/24'
-var vm1SubnetPrefix = '10.0.1.0/24'
-var vm2SubnetPrefix = '10.0.2.0/24'
-var peSubnetPrefix = '10.0.3.0/24'
-var routeTableVm1Name = 'rt-vm1'
-var routeTableVm2Name = 'rt-vm2'
-var vm1Name = 'training-vm1'
-var vm2Name = 'training-vm2'
 param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
@@ -86,25 +14,56 @@ param adminPassword string
 	'Standard_B4ps_v2'
 ])
 param vmSize string = 'Standard_B2ps_v2'
-var firewallName = 'training-firewall'
-var firewallPolicyName = 'training-firewall-policy'
-var firewallPrivateIp = '10.0.0.4'
-var dnsZoneName = 'privatelink.file.${environment().suffixes.storage}'
-var privateEndpointName = 'training-pe'
-var storageAccountName = 'trngstor${uniqueString(resourceGroup().id)}'
 
 // Variables
+// Network Variables
+var vnetName = 'training-vnet'
+var vnetAddressPrefix = '10.0.0.0/16'
+var azureFirewallSubnetName = 'AzureFirewallSubnet'
+var firewallSubnetPrefix = '10.0.0.0/24'
+var vm1SubnetName = 'VM1Subnet'
+var vm1SubnetPrefix = '10.0.1.0/24'
+var vm2SubnetName = 'VM2Subnet'
+var vm2SubnetPrefix = '10.0.2.0/24'
+var peSubnetName = 'PESubnet'
+var peSubnetPrefix = '10.0.3.0/24'
 var vm3SubnetName = 'VM3Subnet'
+var vm3SubnetPrefix = '10.0.4.0/24'
 var vm4SubnetName = 'VM4Subnet'
+var vm4SubnetPrefix = '10.0.5.0/24'
 var vm5SubnetName = 'VM5Subnet'
+var vm5SubnetPrefix = '10.0.6.0/24'
+var routeTableVm1Name = 'rt-vm1'
+var routeTableVm2Name = 'rt-vm2'
+var routeTableVm3Name = 'rt-vm3'
+var routeTableVm4Name = 'rt-vm4'
+var routeTableVm5Name = 'rt-vm5'
+var peSubnetLastIp = '10.0.3.254'
+
+// Compute Variables
+var vm1Name = 'training-vm1'
+var vm2Name = 'training-vm2'
+var vm3Name = 'training-vm3'
+var vm4Name = 'training-vm4'
+var vm5Name = 'training-vm5'
 var imagePublisher = 'Canonical'
 var imageOffer = '0001-com-ubuntu-server-jammy'
 var imageSku = '22_04-lts-arm64'
 var imageVersion = 'latest'
 
-//last IP in PE subnet
-var peSubnetLastIp = '10.0.3.254' 
+// Security Variables
+var firewallName = 'training-firewall'
+var firewallPolicyName = 'training-firewall-policy'
+var firewallPrivateIp = '10.0.0.4'
 
+// Storage Variables
+var storageAccountName = 'trngstor${uniqueString(resourceGroup().id)}'
+
+// DNS Variables
+var dnsZoneName = 'privatelink.file.${environment().suffixes.storage}'
+
+// Private Endpoint Variables
+var privateEndpointName = 'training-pe'
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
 	name: routeTableVm1Name
 	location: location
@@ -163,7 +122,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 		}
 		subnets: [
 			{
-				name: 'AzureFirewallSubnet'
+			name: azureFirewallSubnetName
 				properties: {
 					addressPrefix: firewallSubnetPrefix
 					privateEndpointNetworkPolicies: 'Disabled'
@@ -171,7 +130,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 				}
 			}
 			{
-				name: 'VM1Subnet'
+			name: vm1SubnetName
 				properties: {
 					addressPrefix: vm1SubnetPrefix
 					routeTable: {
@@ -182,7 +141,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 				}
 			}
 			{
-				name: 'VM2Subnet'
+			name: vm2SubnetName
 				properties: {
 					addressPrefix: vm2SubnetPrefix
 					routeTable: {
@@ -241,7 +200,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
 				}
 			}
 			{
-				name: 'PESubnet'
+			name: peSubnetName
 				properties: {
 					addressPrefix: peSubnetPrefix
 					privateEndpointNetworkPolicies: 'RouteTableEnabled'
@@ -690,6 +649,59 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 }
 
 
+resource routeTableVm3 'Microsoft.Network/routeTables@2023-09-01' = {
+	name: routeTableVm3Name
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
+	properties: {
+		disableBgpRoutePropagation: false
+		routes: [
+			{
+				name: 'default-to-firewall'
+				properties: {
+					addressPrefix: '0.0.0.0/0'
+					nextHopType: 'VirtualAppliance'
+					nextHopIpAddress: firewallPrivateIp
+				}
+			}
+		]
+	}
+}
+
+resource routeTableVm4 'Microsoft.Network/routeTables@2023-09-01' = {
+	name: routeTableVm4Name
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
+	properties: {
+		disableBgpRoutePropagation: false
+		routes: [
+			{
+				name: 'storage-to-firewall'
+				properties: {
+					addressPrefix: 'Storage'
+					nextHopType: 'VirtualAppliance'
+					nextHopIpAddress: firewallPrivateIp
+				}
+			}
+		]
+	}
+}
+
+resource routeTableVm5 'Microsoft.Network/routeTables@2023-09-01' = {
+	name: routeTableVm5Name
+	location: location
+	tags: {
+		bicepRevision: string(bicepRevision)
+	}
+	properties: {
+		disableBgpRoutePropagation: false
+		routes: []
+	}
+}
 
 
 
