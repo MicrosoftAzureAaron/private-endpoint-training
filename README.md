@@ -77,6 +77,7 @@ This template deploys a secure Azure environment for private endpoint training, 
 
 ## Deploy to Azure
 
+
 To deploy this template in your Azure subscription, use the button below:
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.3.3)
@@ -86,6 +87,14 @@ To deploy this template in your Azure subscription, use the button below:
 > **Note:** The button above will deploy the latest `main.json` from this GitHub repository's main branch.
 
 ---
+
+## Deploy the Fix Template
+
+To apply the storage endpoint and ACL fix, use the button below:
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Ffix.json)
+
+> **Note:** This will deploy the `fix.json` template from the main branch to update storage service endpoints and ACLs as described above.
 
 ## Template Overview
 This template is designed for secure, segmented access to Azure Storage via private endpoints, with all traffic routed through Azure Firewall for inspection and control.
