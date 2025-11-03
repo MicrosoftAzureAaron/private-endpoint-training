@@ -1,5 +1,5 @@
 // Revision number for tracking deployments
-var bicepRevision = '0.3.2' //added as tag on each resource to track deployment version
+var bicepRevision = '0.3.3' //added as tag on each resource to track deployment version
 
 // Parameters
 param location string = resourceGroup().location
@@ -7,11 +7,11 @@ param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
 @allowed([
-	'Standard_B2pls_v2'
-	'Standard_B2ps_v2'
-	'Standard_B2pts_v2'
-	'Standard_B4pls_v2'
-	'Standard_B4ps_v2'
+  'Standard_B2pls_v2'
+  'Standard_B2ps_v2'
+  'Standard_B2pts_v2'
+  'Standard_B4pls_v2'
+  'Standard_B4ps_v2'
 ])
 param vmSize string = 'Standard_B2ps_v2'
 
@@ -65,393 +65,284 @@ var dnsZoneName = 'privatelink.file.${environment().suffixes.storage}'
 // Private Endpoint Variables
 var privateEndpointName = 'training-pe'
 resource routeTableVm1 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm1Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'default-to-firewall'
-				properties: {
-					addressPrefix: '0.0.0.0/0'
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIp
-				}
-			}
-		]
-	}
+  name: routeTableVm1Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'default-to-firewall'
+        properties: {
+          addressPrefix: '0.0.0.0/0'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: firewallPrivateIp
+        }
+      }
+    ]
+  }
 }
-
 
 resource routeTableVm2 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm2Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'pe-to-firewall'
-				properties: {
-					addressPrefix: peSubnetPrefix
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIp
-				}
-			}
-		]
-	}
+  name: routeTableVm2Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'pe-to-firewall'
+        properties: {
+          addressPrefix: peSubnetPrefix
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: firewallPrivateIp
+        }
+      }
+    ]
+  }
 }
 
-// Two VMs in different subnets
+// 5 VMs in different subnets
 resource vnet 'Microsoft.Network/virtualNetworks@2023-09-01' = {
-	name: vnetName
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		addressSpace: {
+  name: vnetName
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    addressSpace: {
       addressPrefixes: [
         vnetAddressPrefix
       ]
-		}
-		subnets: [
-			{
-			name: azureFirewallSubnetName
-				properties: {
-					addressPrefix: firewallSubnetPrefix
-					privateEndpointNetworkPolicies: 'Disabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-			{
-			name: vm1SubnetName
-				properties: {
-					addressPrefix: vm1SubnetPrefix
-					routeTable: {
-						id: routeTableVm1.id
-					}
-					privateEndpointNetworkPolicies: 'Disabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-			{
-			name: vm2SubnetName
-				properties: {
-					addressPrefix: vm2SubnetPrefix
-					routeTable: {
-						id: routeTableVm2.id
-					}
-					privateEndpointNetworkPolicies: 'Disabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-			{
-				name: vm3SubnetName
-				properties: {
-					addressPrefix: vm3SubnetPrefix
-					routeTable: {
-						id: routeTableVm3.id
-					}
-					serviceEndpoints: [
-						{
-							service: 'Microsoft.Storage'
-						}
-					]
-					privateEndpointNetworkPolicies: 'Disabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-			{
-				name: vm4SubnetName
-				properties: {
-					addressPrefix: vm4SubnetPrefix
-					routeTable: {
-						id: routeTableVm4.id
-					}
-					serviceEndpoints: [
-						{
-							service: 'Microsoft.Storage'
-						}
-					]
-					privateEndpointNetworkPolicies: 'Disabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-			{
-				name: vm5SubnetName
-				properties: {
-					addressPrefix: vm5SubnetPrefix
-					routeTable: {
-						id: routeTableVm5.id
-					}
-					serviceEndpoints: [
-						{
-							service: 'Microsoft.Storage'
-						}
-					]
-					privateEndpointNetworkPolicies: 'Disabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-			{
-			name: peSubnetName
-				properties: {
-					addressPrefix: peSubnetPrefix
-					privateEndpointNetworkPolicies: 'RouteTableEnabled'
-					privateLinkServiceNetworkPolicies: 'Enabled'
-				}
-			}
-		]
-	}
-}
-
-resource vm3Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
-	name: '${vm3Name}-nic'
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		ipConfigurations: [
-			{
-				name: 'ipconfig1'
-				properties: {
-					subnet: {
-						id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
-					}
-				}
-			}
-		]
-	}
-}
-
-resource vm4Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
-	name: '${vm4Name}-nic'
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		ipConfigurations: [
-			{
-				name: 'ipconfig1'
-				properties: {
-					subnet: {
-						id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
-					}
-				}
-			}
-		]
-	}
-}
-
-resource vm5Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
-	name: '${vm5Name}-nic'
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		ipConfigurations: [
-			{
-				name: 'ipconfig1'
-				properties: {
-					subnet: {
-						id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
-					}
-				}
-			}
-		]
-	}
-}
-
-resource vm3 'Microsoft.Compute/virtualMachines@2023-09-01' = {
-	name: vm3Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		hardwareProfile: {
-			vmSize: vmSize
-		}
-		osProfile: {
-			computerName: vm3Name
-			adminUsername: adminUsername
-			adminPassword: adminPassword
-		}
-		storageProfile: {
-			imageReference: {
-				publisher: imagePublisher
-				offer: imageOffer
-				sku: imageSku
-				version: imageVersion
-			}
-			osDisk: {
-				createOption: 'FromImage'
-			}
-		}
-		networkProfile: {
-			networkInterfaces: [
-				{
-					id: vm3Nic.id
-				}
-			]
-		}
-	}
-}
-
-resource vm4 'Microsoft.Compute/virtualMachines@2023-09-01' = {
-	name: vm4Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		hardwareProfile: {
-			vmSize: vmSize
-		}
-		osProfile: {
-			computerName: vm4Name
-			adminUsername: adminUsername
-			adminPassword: adminPassword
-		}
-		storageProfile: {
-			imageReference: {
-				publisher: imagePublisher
-				offer: imageOffer
-				sku: imageSku
-				version: imageVersion
-			}
-			osDisk: {
-				createOption: 'FromImage'
-			}
-		}
-		networkProfile: {
-			networkInterfaces: [
-				{
-					id: vm4Nic.id
-				}
-			]
-		}
-	}
-}
-
-resource vm5 'Microsoft.Compute/virtualMachines@2023-09-01' = {
-	name: vm5Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		hardwareProfile: {
-			vmSize: vmSize
-		}
-		osProfile: {
-			computerName: vm5Name
-			adminUsername: adminUsername
-			adminPassword: adminPassword
-		}
-		storageProfile: {
-			imageReference: {
-				publisher: imagePublisher
-				offer: imageOffer
-				sku: imageSku
-				version: imageVersion
-			}
-			osDisk: {
-				createOption: 'FromImage'
-			}
-		}
-		networkProfile: {
-			networkInterfaces: [
-				{
-					id: vm5Nic.id
-				}
-			]
-		}
-	}
+    }
+    subnets: [
+      {
+        name: azureFirewallSubnetName
+        properties: {
+          addressPrefix: firewallSubnetPrefix
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: vm1SubnetName
+        properties: {
+          addressPrefix: vm1SubnetPrefix
+          routeTable: {
+            id: routeTableVm1.id
+          }
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: vm2SubnetName
+        properties: {
+          addressPrefix: vm2SubnetPrefix
+          routeTable: {
+            id: routeTableVm2.id
+          }
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: vm3SubnetName
+        properties: {
+          addressPrefix: vm3SubnetPrefix
+          routeTable: {
+            id: routeTableVm3.id
+          }
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.Storage'
+            }
+          ]
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: vm4SubnetName
+        properties: {
+          addressPrefix: vm4SubnetPrefix
+          routeTable: {
+            id: routeTableVm4.id
+          }
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.Storage'
+            }
+          ]
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: vm5SubnetName
+        properties: {
+          addressPrefix: vm5SubnetPrefix
+          routeTable: {
+            id: routeTableVm5.id
+          }
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.Storage'
+            }
+          ]
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: peSubnetName
+        properties: {
+          addressPrefix: peSubnetPrefix
+          privateEndpointNetworkPolicies: 'RouteTableEnabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+    ]
+  }
 }
 
 resource vm1Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
-	name: '${vm1Name}-nic'
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		ipConfigurations: [
-			{
-				name: 'ipconfig1'
-				properties: {
-					subnet: {
-						id: vnet.properties.subnets[1].id
-					}
-				}
-			}
-		]
-	}
+  name: '${vm1Name}-nic'
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: vnet.properties.subnets[1].id
+          }
+        }
+      }
+    ]
+  }
 }
 
 resource vm2Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
-	name: '${vm2Name}-nic'
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		ipConfigurations: [
-			{
-				name: 'ipconfig1'
-				properties: {
-					subnet: {
-						id: vnet.properties.subnets[2].id
-					}
-				}
-			}
-		]
-	}
+  name: '${vm2Name}-nic'
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: vnet.properties.subnets[2].id
+          }
+        }
+      }
+    ]
+  }
+}
+
+resource vm3Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
+  name: '${vm3Name}-nic'
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
+          }
+        }
+      }
+    ]
+  }
+}
+
+resource vm4Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
+  name: '${vm4Name}-nic'
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
+          }
+        }
+      }
+    ]
+  }
+}
+
+resource vm5Nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
+  name: '${vm5Name}-nic'
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
+          }
+        }
+      }
+    ]
+  }
 }
 
 resource vm1 'Microsoft.Compute/virtualMachines@2023-09-01' = {
   name: vm1Name
   location: location
   tags: {
-	bicepRevision: string(bicepRevision)
+    bicepRevision: string(bicepRevision)
   }
   properties: {
-	hardwareProfile: {
-	  vmSize: vmSize
-	}
-	osProfile: {
-	  computerName: vm1Name
-	  adminUsername: adminUsername
-	  adminPassword: adminPassword
-	}
-	storageProfile: {
-	  imageReference: {
-		publisher: imagePublisher
-		offer: imageOffer
-		sku: imageSku
-		version: imageVersion
-	  }
-	  osDisk: {
-		createOption: 'FromImage'
-	  }
-	}
-	networkProfile: {
-	  networkInterfaces: [
-		{
-		  id: vm1Nic.id
-		}
-	  ]
-	}
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    osProfile: {
+      computerName: vm1Name
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: imagePublisher
+        offer: imageOffer
+        sku: imageSku
+        version: imageVersion
+      }
+      osDisk: {
+        createOption: 'FromImage'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: vm1Nic.id
+        }
+      ]
+    }
   }
 }
 
@@ -459,35 +350,143 @@ resource vm2 'Microsoft.Compute/virtualMachines@2023-09-01' = {
   name: vm2Name
   location: location
   tags: {
-	bicepRevision: string(bicepRevision)
+    bicepRevision: string(bicepRevision)
   }
   properties: {
-	hardwareProfile: {
-	  vmSize: vmSize
-	}
-	osProfile: {
-	  computerName: vm2Name
-	  adminUsername: adminUsername
-	  adminPassword: adminPassword
-	}
-	storageProfile: {
-	  imageReference: {
-		publisher: imagePublisher
-		offer: imageOffer
-		sku: imageSku
-		version: imageVersion
-	  }
-	  osDisk: {
-		createOption: 'FromImage'
-	  }
-	}
-	networkProfile: {
-	  networkInterfaces: [
-		{
-		  id: vm2Nic.id
-		}
-	  ]
-	}
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    osProfile: {
+      computerName: vm2Name
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: imagePublisher
+        offer: imageOffer
+        sku: imageSku
+        version: imageVersion
+      }
+      osDisk: {
+        createOption: 'FromImage'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: vm2Nic.id
+        }
+      ]
+    }
+  }
+}
+
+resource vm3 'Microsoft.Compute/virtualMachines@2023-09-01' = {
+  name: vm3Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    osProfile: {
+      computerName: vm3Name
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: imagePublisher
+        offer: imageOffer
+        sku: imageSku
+        version: imageVersion
+      }
+      osDisk: {
+        createOption: 'FromImage'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: vm3Nic.id
+        }
+      ]
+    }
+  }
+}
+
+resource vm4 'Microsoft.Compute/virtualMachines@2023-09-01' = {
+  name: vm4Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    osProfile: {
+      computerName: vm4Name
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: imagePublisher
+        offer: imageOffer
+        sku: imageSku
+        version: imageVersion
+      }
+      osDisk: {
+        createOption: 'FromImage'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: vm4Nic.id
+        }
+      ]
+    }
+  }
+}
+
+resource vm5 'Microsoft.Compute/virtualMachines@2023-09-01' = {
+  name: vm5Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    hardwareProfile: {
+      vmSize: vmSize
+    }
+    osProfile: {
+      computerName: vm5Name
+      adminUsername: adminUsername
+      adminPassword: adminPassword
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: imagePublisher
+        offer: imageOffer
+        sku: imageSku
+        version: imageVersion
+      }
+      osDisk: {
+        createOption: 'FromImage'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: vm5Nic.id
+        }
+      ]
+    }
   }
 }
 
@@ -495,220 +494,209 @@ resource firewallPublicIp 'Microsoft.Network/publicIPAddresses@2023-09-01' = {
   name: 'firewall-pip'
   location: location
   tags: {
-	bicepRevision: string(bicepRevision)
+    bicepRevision: string(bicepRevision)
   }
   sku: {
-	name: 'Standard'
+    name: 'Standard'
   }
   properties: {
-	publicIPAllocationMethod: 'Static'
+    publicIPAllocationMethod: 'Static'
   }
 }
 
 resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-09-01' = {
-	name: firewallName
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		sku: {
-			name: 'AZFW_VNet'
-			tier: 'Standard'
-		}
-		ipConfigurations: [
-			{
-				name: 'firewall-ipconfig'
-				properties: {
-					subnet: {
-						id: vnet.properties.subnets[0].id
-					}
-					publicIPAddress: {
-						id: firewallPublicIp.id
-					}
-				}
-			}
-		]
-			firewallPolicy: {
-				id: azureFirewallAllowPolicy.outputs.firewallPolicyId
-			}
-		}
-	}
+  name: firewallName
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    sku: {
+      name: 'AZFW_VNet'
+      tier: 'Standard'
+    }
+    ipConfigurations: [
+      {
+        name: 'firewall-ipconfig'
+        properties: {
+          subnet: {
+            id: vnet.properties.subnets[0].id
+          }
+          publicIPAddress: {
+            id: firewallPublicIp.id
+          }
+        }
+      }
+    ]
+    firewallPolicy: {
+      id: azureFirewallAllowPolicy.outputs.firewallPolicyId
+    }
+  }
+}
 
 module azureFirewallAllowPolicy 'AzureFirewallAllowPolicy.bicep' = {
-		name: 'azureFirewallAllowPolicy'
-		params: {
-			firewallPolicyName: firewallPolicyName
-		}
+  name: 'azureFirewallAllowPolicy'
+  params: {
+    firewallPolicyName: firewallPolicyName
+  }
 }
 
 // Private DNS Zone for Storage Account private endpoint
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
-	name: dnsZoneName
-		location: 'global'
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
+  name: dnsZoneName
+  location: 'global'
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
 }
 
 // Private DNS A record for the storage account's private endpoint
 resource privateDnsARecord 'Microsoft.Network/privateDnsZones/A@2024-06-01' = {
-	name: '${storageAccountName}.${dnsZoneName}'
-	parent: privateDnsZone
-	properties: {
-		aRecords: [
-			{
-				ipv4Address: peSubnetLastIp
-			}
-		]
-		ttl: 3600
-	}
+  name: '${storageAccountName}.${dnsZoneName}'
+  parent: privateDnsZone
+  properties: {
+    aRecords: [
+      {
+        ipv4Address: peSubnetLastIp
+      }
+    ]
+    ttl: 3600
+  }
 }
 
 resource dnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
-	parent: privateDnsZone
-	name: 'vnet-link'
-		location: 'global'
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
-	properties: {
-		virtualNetwork: {
- 			id: resourceId('Microsoft.Network/virtualNetworks', vnetName)
-		}
-		registrationEnabled: false
-	}
+  parent: privateDnsZone
+  name: 'vnet-link'
+  location: 'global'
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    virtualNetwork: {
+      id: resourceId('Microsoft.Network/virtualNetworks', vnetName)
+    }
+    registrationEnabled: false
+  }
 }
 
 resource privateEndpoint 'Microsoft.Network/privateEndpoints@2023-09-01' = {
-	name: privateEndpointName
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		subnet: {
- 			id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, 'PESubnet')
-		}
-		customNetworkInterfaceName: '${privateEndpointName}-nic'
-		ipConfigurations: [
-			{
-				name: 'pe-ipconfig'
-				properties: {
-					privateIPAddress: peSubnetLastIp
-                    groupId: 'file'
-                    memberName: 'file'
-				}
-			}
-		]
-		privateLinkServiceConnections: [
-			{
-				name: 'storageAccountFileConnection'
-				properties: {
-					privateLinkServiceId: storageAccount.id
-					groupIds: ['file']
-				}
-			}
-		]
-	}
+  name: privateEndpointName
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    subnet: {
+      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, 'PESubnet')
+    }
+    customNetworkInterfaceName: '${privateEndpointName}-nic'
+    ipConfigurations: [
+      {
+        name: 'pe-ipconfig'
+        properties: {
+          privateIPAddress: peSubnetLastIp
+          groupId: 'file'
+          memberName: 'file'
+        }
+      }
+    ]
+    privateLinkServiceConnections: [
+      {
+        name: 'storageAccountFileConnection'
+        properties: {
+          privateLinkServiceId: storageAccount.id
+          groupIds: ['file']
+        }
+      }
+    ]
+  }
 }
 
 // Storage Account with File service enabled
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-	name: storageAccountName
-		location: location
-		tags: {
-			bicepRevision: string(bicepRevision)
-		}
-	sku: {
-		name: 'Standard_LRS'
-	}
-	kind: 'StorageV2'
-		properties: {
-			accessTier: 'Hot'
-			allowBlobPublicAccess: false
-			minimumTlsVersion: 'TLS1_2'
-			supportsHttpsTrafficOnly: true
-			networkAcls: {
-				bypass: 'AzureServices'
-				defaultAction: 'Deny'
-								virtualNetworkRules: [
-									{
-										id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
-									}
-									{
-										id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
-									}
-									{
-										id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
-									}
-								]
-			}
-			isHnsEnabled: false
-		}
+  name: storageAccountName
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+    allowBlobPublicAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      virtualNetworkRules: [
+        {
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm3SubnetName)
+        }
+        {
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm4SubnetName)
+        }
+        {
+          id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, vm5SubnetName)
+        }
+      ]
+    }
+    isHnsEnabled: false
+  }
 }
 
-
 resource routeTableVm3 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm3Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'default-to-firewall'
-				properties: {
-					addressPrefix: '0.0.0.0/0'
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIp
-				}
-			}
-		]
-	}
+  name: routeTableVm3Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'default-to-firewall'
+        properties: {
+          addressPrefix: '0.0.0.0/0'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: firewallPrivateIp
+        }
+      }
+    ]
+  }
 }
 
 resource routeTableVm4 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm4Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: [
-			{
-				name: 'storage-to-firewall'
-				properties: {
-					addressPrefix: 'Storage'
-					nextHopType: 'VirtualAppliance'
-					nextHopIpAddress: firewallPrivateIp
-				}
-			}
-		]
-	}
+  name: routeTableVm4Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: [
+      {
+        name: 'storage-to-firewall'
+        properties: {
+          addressPrefix: 'Storage'
+          nextHopType: 'VirtualAppliance'
+          nextHopIpAddress: firewallPrivateIp
+        }
+      }
+    ]
+  }
 }
 
 resource routeTableVm5 'Microsoft.Network/routeTables@2023-09-01' = {
-	name: routeTableVm5Name
-	location: location
-	tags: {
-		bicepRevision: string(bicepRevision)
-	}
-	properties: {
-		disableBgpRoutePropagation: false
-		routes: []
-	}
+  name: routeTableVm5Name
+  location: location
+  tags: {
+    bicepRevision: string(bicepRevision)
+  }
+  properties: {
+    disableBgpRoutePropagation: false
+    routes: []
+  }
 }
-
-
-
-
-
-
-
-
-
-

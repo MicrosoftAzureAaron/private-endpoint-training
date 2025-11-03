@@ -74,7 +74,7 @@ This template deploys a secure Azure environment for private endpoint training, 
 ### VM4 Effective Routes, Route Table with Service Tag for Storage Impacts some Routes
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm4effectiveroutes.png)
 
-### VM5 Effective Routes, Route Table no routes does not impact Service Endpoint Routes
+### VM5 Effective Routes, Route Table 0 routes does not impact Service Endpoint Routes
 ![VM2 Effective Routes](https://raw.githubusercontent.com/MicrosoftAzureAaron/private-endpoint-training/main/images/vm5effectiveroutes.png)
 
 
@@ -82,7 +82,7 @@ This template deploys a secure Azure environment for private endpoint training, 
 
 To deploy this template in your Azure subscription, use the button below:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.3.2)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FMicrosoftAzureAaron%2Fprivate-endpoint-training%2Fmain%2Fmain.json?nocache=0.3.3)
 
 > **Tip:** You can right-click the Deploy to Azure button and select "Open link in new tab," or hold **Ctrl** (Windows) / **Cmd** (Mac) and click the button to open the deployment portal in a new tab.
 
@@ -103,6 +103,7 @@ This template is designed for secure, segmented access to Azure Storage via priv
 VNET (or a more specific prefix) in the VM subnet's route table, pointing to the Azure Firewall as the next hop. If this override route is missing, private endpoint traffic will not be inspected by the firewall.
 
 For questions or improvements, please open an issue or contact the author.
+
 
 
 

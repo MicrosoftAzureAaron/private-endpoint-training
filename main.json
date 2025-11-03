@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.38.33.27573",
-      "templateHash": "14880039577793914709"
+      "templateHash": "11698442228352545838"
     }
   },
   "parameters": {
@@ -33,7 +33,7 @@
     }
   },
   "variables": {
-    "bicepRevision": "0.3.2",
+    "bicepRevision": "0.3.3",
     "vnetName": "training-vnet",
     "vnetAddressPrefix": "10.0.0.0/16",
     "azureFirewallSubnetName": "AzureFirewallSubnet",
@@ -231,6 +231,54 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2023-09-01",
+      "name": "[format('{0}-nic', variables('vm1Name'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[1].id]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-09-01",
+      "name": "[format('{0}-nic', variables('vm2Name'))]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[2].id]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-09-01",
       "name": "[format('{0}-nic', variables('vm3Name'))]",
       "location": "[parameters('location')]",
       "tags": {
@@ -290,6 +338,86 @@
           }
         ]
       }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('vm1Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vm1Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm1Name')))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm1Name')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('vm2Name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "bicepRevision": "[string(variables('bicepRevision'))]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vm2Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSku')]",
+            "version": "[variables('imageVersion')]"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm2Name')))]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm2Name')))]"
+      ]
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -409,134 +537,6 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm5Name')))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}-nic', variables('vm1Name'))]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "subnet": {
-                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[1].id]"
-              }
-            }
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2023-09-01",
-      "name": "[format('{0}-nic', variables('vm2Name'))]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "subnet": {
-                "id": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-09-01').subnets[2].id]"
-              }
-            }
-          }
-        ]
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('vm1Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[variables('vm1Name')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('imageSku')]",
-            "version": "[variables('imageVersion')]"
-          },
-          "osDisk": {
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm1Name')))]"
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm1Name')))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2023-09-01",
-      "name": "[variables('vm2Name')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "bicepRevision": "[string(variables('bicepRevision'))]"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[variables('vm2Name')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('imageSku')]",
-            "version": "[variables('imageVersion')]"
-          },
-          "osDisk": {
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm2Name')))]"
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/networkInterfaces', format('{0}-nic', variables('vm2Name')))]"
       ]
     },
     {
